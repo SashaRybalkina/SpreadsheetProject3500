@@ -17,8 +17,5 @@ estimate needing 10 hours. In total, 17 hours will be needed.
 # Time Spent
 It took me a total of 12 hours to finish FormulaEvaluator. Most of this time
 was spent debugging. To finish DependencyGraph, I needed 8 hours. In total,
-<<<<<<< HEAD
+
 I have spent 20 implemeting the spreadsheet.
-=======
-I have spent 20 implemeting the spreadsheet.
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89
