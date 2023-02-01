@@ -257,6 +257,28 @@ namespace SpreadsheetUtilities
                 }
             }
         }
+        private static int AddOrSubtract(int value1, int value2, string op)
+        {
+            if (op == "+")
+            {
+                return value1 + value2;
+            }
+            else
+            {
+                return value1 - value2;
+            }
+        }
+        private static int MultiplyOrDivide(int value1, int value2, string op)
+        {
+            if (op == "*")
+            {
+                return value1 * value2;
+            }
+            else
+            {
+                return value1/value2;
+            }
+        }
         /// <summary>
         /// Evaluates this Formula, using the lookup delegate to determine the values 
         /// of
@@ -268,25 +290,25 @@ namespace SpreadsheetUtilities
         /// 
         /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts 
         /// all the letters
-    /// in a string to upper case:
-    /// 
-    /// new Formula("x+7", N, s => true).Evaluate(L) is 11
-    /// new Formula("x+7").Evaluate(L) is 9
-    /// 
-    /// Given a variable symbol as its parameter, lookup returns the variable's 
-    /// value
-/// (if it has one) or throws an ArgumentException (otherwise).
-/// 
-/// If no undefined variables or divisions by zero are encountered when 
-/// evaluating
-    /// this Formula, the value is returned.  Otherwise, a FormulaError is 
-/// returned.
-/// The Reason property of the FormulaError should have a meaningful 
-/// explanation.
-    ///
-    /// This method should never throw an exception.
-    /// </summary>
-    public object Evaluate(Func<string, double> lookup)
+        /// in a string to upper case:
+        /// 
+        /// new Formula("x+7", N, s => true).Evaluate(L) is 11
+        /// new Formula("x+7").Evaluate(L) is 9
+        /// 
+        /// Given a variable symbol as its parameter, lookup returns the variable's 
+        /// value
+        /// (if it has one) or throws an ArgumentException (otherwise).
+        /// 
+        /// If no undefined variables or divisions by zero are encountered when 
+        /// evaluating
+        /// this Formula, the value is returned.  Otherwise, a FormulaError is 
+        /// returned.
+        /// The Reason property of the FormulaError should have a meaningful 
+        /// explanation.
+        ///
+        /// This method should never throw an exception.
+        /// </summary>
+        public object Evaluate(Func<string, double> lookup)
         {
             ArrayList expression = (ArrayList)GetTokens(formula);
             Stack<int> ValueStack = new System.Collections.Generic.Stack<int>();
@@ -305,16 +327,7 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        if (OperatorStack.Peek() == "*")
-                        {
-                            OperatorStack.Pop();
-                            ValueStack.Push(ValueStack.Pop() * intResult);
-                        }
-                        else
-                        {
-                            OperatorStack.Pop();
-                            ValueStack.Push(ValueStack.Pop() / intResult);
-                        }
+                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), intResult, OperatorStack.Pop()));
                     }
                     else
                     {
@@ -328,17 +341,7 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        if (OperatorStack.Peek() == "*")
-                        {
-                            OperatorStack.Pop();
-                            ValueStack.Push(ValueStack.Pop() * (int)lookup(token));
-                        }
-                        else
-                        {
-
-                            OperatorStack.Pop();
-                            ValueStack.Push(ValueStack.Pop() / (int)lookup(token));
-                        }
+                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token), OperatorStack.Pop()));
                     }
                     else
                     {
@@ -354,15 +357,9 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
-                        if (OperatorStack.Peek() == "+")
-                        {
-                            ValueStack.Push(ValueStack.Pop() + ValueStack.Pop());
-                        }
-                        else
-                        {
-                            ValueStack.Push(0 - ValueStack.Pop() + ValueStack.Pop());
-                        }
-                        OperatorStack.Pop();
+                        int value2 = ValueStack.Pop();
+                        int value1 = ValueStack.Pop();
+                        ValueStack.Push(AddOrSubtract(value1, value2, OperatorStack.Pop()));
                     }
                     OperatorStack.Push(token);
                 }
@@ -373,32 +370,18 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
-                        if (OperatorStack.Peek() == "+")
-                        {
-                            ValueStack.Push(ValueStack.Pop() + ValueStack.Pop());
-                        }
-                        else
-                        {
-                            ValueStack.Push(0 - ValueStack.Pop() + ValueStack.Pop());
-                        }
-                        OperatorStack.Pop();
+                        int value2 = ValueStack.Pop();
+                        int value1 = ValueStack.Pop();
+                        ValueStack.Push(AddOrSubtract(value1, value2, OperatorStack.Pop()));
                     }
 
                     OperatorStack.Pop();
 
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        if (OperatorStack.Peek() == "*")
-                        {
-                            ValueStack.Push(ValueStack.Pop() * ValueStack.Pop());
-                        }
-                        else
-                        {
-                            int val1 = ValueStack.Pop();
-                            int val2 = ValueStack.Pop();
-                            ValueStack.Push(val2 / val1);
-                        }
-                        OperatorStack.Pop();
+                        int value2 = ValueStack.Pop();
+                        int value1 = ValueStack.Pop();
+                        ValueStack.Push(MultiplyOrDivide(value1, value2, OperatorStack.Pop()));
                     }
                 }
             }
@@ -409,23 +392,15 @@ namespace SpreadsheetUtilities
             ///was running, this is where this expression gets handled.
             if (ValueStack.Count() > 1)
             {
-                if (OperatorStack.Peek() == "*")
+                int value2 = ValueStack.Pop();
+                int value1 = ValueStack.Pop();
+                if (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/")
                 {
-                    result = ValueStack.Pop() * ValueStack.Pop();
+                    result = MultiplyOrDivide(value1, value2, OperatorStack.Pop());
                 }
-                if (OperatorStack.Peek() == "/")
+                if (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-")
                 {
-                    int val1 = ValueStack.Pop();
-                    int val2 = ValueStack.Pop();
-                    result = val2 / val1;
-                }
-                if (OperatorStack.Peek() == "+")
-                {
-                    result = ValueStack.Pop() + ValueStack.Pop();
-                }
-                if (OperatorStack.Peek() == "-")
-                {
-                    result = 0 - ValueStack.Pop() + ValueStack.Pop();
+                    result = AddOrSubtract(value1, value2, OperatorStack.Pop());
                 }
             }
             else
@@ -616,20 +591,3 @@ namespace SpreadsheetUtilities
         public string Reason { get; private set; }
     }
 }
-// <change>
-//   If you are using Extension methods to deal with common stack operations (e.g.,
-//checking for
-//   an empty stack before peeking) you will find that the Non-Nullable checking is
-//"biting" you.
-//
-//   To fix this, you have to use a little special syntax like the following:
-//
-//       public static bool OnTop<T>(this Stack<T> stack, T element1, T element2) 
-//where T : notnull
-//
-//   Notice that the "where T : notnull" tells the compiler that the Stack can 
-//contain any object
-//   as long as it doesn't allow nulls!
-// </change>
-
-// jim was here.
