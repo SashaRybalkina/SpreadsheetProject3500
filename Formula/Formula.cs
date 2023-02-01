@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SpreadsheetUtilities
 {
@@ -125,7 +126,7 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string,
     bool> isValid)
         {
-            string[] formulaArray = Regex.Split(formula, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+            string[] formulaArray = Regex.Split(formula, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)|()");
             var left = formula.Count(x => x == '(');
             var right = formula.Count(x => x == ')');
             if (left != right) throw new FormulaFormatException("Cannot have open parentheses");
@@ -141,12 +142,17 @@ namespace SpreadsheetUtilities
                         break;
                     }
                 }
+                ///This determines the index of the next token.
+                int next = determineNext(formulaArray, i);
+
                 ///This if statement checks for all errors associated with operators. Two operators cannot be next to each other,
                 ///an operator cannot precede a right parenthesis, and a division by zero cannot occur.
                 if (formulaArray[i] == "+" || formulaArray[i] == "-" || formulaArray[i] == "*" || formulaArray[i] == "/")
                 {
-                    ///This determines the index of the next token.
-                    int next = determineNext(formulaArray, i);
+                    if (i == 0 || i == formulaArray.Count())
+                    {
+                        throw new FormulaFormatException("Cannot have trailing operators");
+                    }
                     ///If an operator is right next to another operator or a right parenthesis, throws an exception.
                     if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/" || formulaArray[next] == ")"))
                     {
@@ -165,8 +171,6 @@ namespace SpreadsheetUtilities
                 ///an integer cannot be right next to a variable, and an integer cannot be outside of parentheses.
                 else if (Int32.TryParse(formulaArray[i], result: out int intResult))
                 {
-                    ///This determines the index of the next token.
-                    int next = determineNext(formulaArray, i);
                     ///If two integers are right next to each other, throws exception.
                     if (i < formulaArray.Length - 1 && (Int32.TryParse(formulaArray[next], result: out int intResult2)))
                     {
@@ -190,8 +194,6 @@ namespace SpreadsheetUtilities
                 ///of parentheses, a variable caanot be outside of parentheses, and an operator cannot be outside of parentheses.
                 else if (formulaArray[i] == ")")
                 {
-                    ///This determines the index of the next token.
-                    int next = determineNext(formulaArray, i);
                     ///If an integer is outside of parentheses, throws an exception.
                     if (i < formulaArray.Length - 1 && Int32.TryParse(formulaArray[next], result: out int intResult2))
                     {
@@ -211,10 +213,20 @@ namespace SpreadsheetUtilities
                     this.formula = this.formula + formulaArray[i];
                 }
 
-                else if (formulaArray[i] != "(")
+                else if (formulaArray[i] == "(")
                 {
-                    ///This determines the index of the next token.
-                    int next = determineNext(formulaArray, i);
+                    if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
+                    {
+                        throw new FormulaFormatException("Cannot have an operator after a left parenthesis.");
+                    }
+                    if (i < formulaArray.Length - 1 && (formulaArray[next] == ")"))
+                    {
+                        throw new FormulaFormatException("Cannot have empty parentheses.");
+                    }
+                }
+
+                else
+                {
                     ///If the variable passed in is not a proper variable, throws an exception.
                     if (!Regex.IsMatch(formulaArray[i], "[a-z|A-Z][0-9]"))
                     {
@@ -542,7 +554,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override int GetHashCode()
         {
-            return formula.Length%31;
+            return formula.Length%10;
         }
         /// <summary>
         /// Given an expression, enumerates the tokens that compose it.  Tokens are 

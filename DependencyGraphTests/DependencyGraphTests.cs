@@ -54,7 +54,6 @@ namespace DevelopmentTests
         /// <summary>
         ///Checks if dependencies are added as intended
         ///</summary>
-<<<<<<< HEAD:DependencyGraphTests/UnitTest1.cs
         [TestMethod()]
         public void AddTest()
         {
@@ -103,56 +102,6 @@ namespace DevelopmentTests
             t.AddDependency("h", "a");
             Assert.AreEqual(t["a"], 3);
         }
-=======
-        [TestMethod()]
-        public void AddTest()
-        {
-            DependencyGraph t = new DependencyGraph();
-            t.AddDependency("a", "y");
-            t.AddDependency("a", "z");
-            t.AddDependency("a", "h");
-            Assert.AreEqual(3, t.Size);
-            Assert.IsTrue(t.GetDependents("a").Contains("y"));
-        }
-        /// <summary>
-        ///Checks the HasDependents method
-        ///</summary>
-        [TestMethod()]
-        public void HasDependentsTest()
-        {
-            DependencyGraph t = new DependencyGraph();
-            t.AddDependency("a", "y");
-            t.AddDependency("a", "z");
-            t.AddDependency("a", "h");
-            Assert.IsTrue(t.HasDependents("a"));
-            Assert.IsFalse(t.HasDependents("y"));
-        }
-        /// <summary>
-        ///Checks the HasDependees method
-        ///</summary>
-        [TestMethod()]
-        public void HasDependeesTest()
-        {
-            DependencyGraph t = new DependencyGraph();
-            t.AddDependency("a", "y");
-            t.AddDependency("a", "z");
-            t.AddDependency("a", "h");
-            Assert.IsFalse(t.HasDependees("a"));
-            Assert.IsTrue(t.HasDependees("y"));
-        }
-        /// <summary>
-        ///Checks the this[string s] method
-        ///</summary>
-        [TestMethod()]
-        public void ThisTest()
-        {
-            DependencyGraph t = new DependencyGraph();
-            t.AddDependency("y", "a");
-            t.AddDependency("z", "a");
-            t.AddDependency("h", "a");
-            Assert.AreEqual(t["a"], 3);
-        }
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89:DependencyGraphTests/DependencyGraphTests.cs
         /// <summary>
         ///Empty graph should contain nothing
         ///</summary>
@@ -174,7 +123,6 @@ namespace DevelopmentTests
         /// <summary>
         ///Replace on an empty DG shouldn't fail
         ///</summary>
-<<<<<<< HEAD:DependencyGraphTests/UnitTest1.cs
         [TestMethod()]
         public void SimpleReplaceTest()
         {
@@ -188,22 +136,6 @@ namespace DevelopmentTests
             Assert.AreEqual(t.GetDependents("x").Count<string>(), 0);
             Assert.AreEqual(t.GetDependees("y").Count<string>(), 0);
         }
-=======
-        [TestMethod()]
-        public void SimpleReplaceTest()
-        {
-            DependencyGraph t = new DependencyGraph();
-            t.AddDependency("x", "y");
-            Assert.AreEqual(t.Size, 1);
-            t.RemoveDependency("x", "y");
-            t.ReplaceDependents("x", new HashSet<string>());
-            t.ReplaceDependees("y", new HashSet<string>());
-            Assert.AreEqual(t.Size, 0);
-            Assert.AreEqual(t.GetDependents("x").Count<string>(), 0);
-            Assert.AreEqual(t.GetDependees("y").Count<string>(), 0);
-        }
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89:DependencyGraphTests/DependencyGraphTests.cs
-        ///<summary>
         ///It should be possibe to have more than one DG at a time.
         ///</summary>
         [TestMethod()]
