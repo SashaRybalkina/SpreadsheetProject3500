@@ -72,7 +72,6 @@ namespace SpreadsheetUtilities
         public Formula(String formula) :
             this(formula, s => s, s => true)
         {
-
         }
         /// <summary>
         /// This is a private helper method for determining the index of the
@@ -178,6 +177,7 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
+                    ///If an integer is outside of parentheses, throws an exception.
                     else if (i < formulaArray.Length - 1 && (formulaArray[next] == "("))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
@@ -186,51 +186,67 @@ namespace SpreadsheetUtilities
                     this.formula = this.formula + intResult;
                 }
 
+                ///This if statement checks for all errors associated with the right parenthesis. An integer cannot be outside
+                ///of parentheses, a variable caanot be outside of parentheses, and an operator cannot be outside of parentheses.
                 else if (formulaArray[i] == ")")
                 {
+                    ///This determines the index of the next token.
                     int next = determineNext(formulaArray, i);
-
+                    ///If an integer is outside of parentheses, throws an exception.
                     if (i < formulaArray.Length - 1 && Int32.TryParse(formulaArray[next], result: out int intResult2))
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
+                    ///If a variable is right outside of a parenthesis, throws an exception.
                     else if (i < formulaArray.Length - 1 && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
+                    ///If an operator is right outside of a parenthesis, throws an exception.
                     else if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
+                    //Builds the formula string for later use.
                     this.formula = this.formula + formulaArray[i];
                 }
 
                 else if (formulaArray[i] != "(")
                 {
+                    ///This determines the index of the next token.
                     int next = determineNext(formulaArray, i);
-
+                    ///If the variable passed in is not a proper variable, throws an exception.
                     if (!Regex.IsMatch(formulaArray[i], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("The variable entered must have one integer and one character.");
                     }
+                    ///If the variable is not valid, throws an exception.
                     else if (!isValid(normalize(formulaArray[i])))
                     {
                         throw new FormulaFormatException("The variable entered is not valid.");
                     }
+                    ///If the variable is next to an integer, throws an exception.
                     else if (i < formulaArray.Length - 1 && Int32.TryParse(formulaArray[next], result: out int intResult2))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
+                    ///If the variable is next to another variable, throws an exception.
                     else if (i < formulaArray.Length - 1 && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive variables in expression");
                     }
+                    ///If the variable is outised of parentheses, throws an exception.
+                    else if (i < formulaArray.Length - 1 && formulaArray[next] == "(")
+                    {
+                        throw new FormulaFormatException("Cannot have a variable outised of parentheses");
+                    }
 
-                    ///This builds the variables list and the formula string for later use
+                    ///This builds the variables list for later use
                     if (!variables.Contains(normalize(formulaArray[i])))
                     {
                         variables.Add(normalize(formulaArray[i]));
                     }
+                    //Builds the formula string for later use.
                     this.formula = this.formula + formulaArray[i];
                 }
             }
