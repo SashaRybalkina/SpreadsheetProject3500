@@ -1,6 +1,4 @@
 ﻿// Skeleton written by Joe Zachary for CS 3500, September 2013
-// Read the entire skeleton carefully and completely before you
-// do anything else!
 // Version 1.1 (9/22/13 11:45 a.m.)
 // Change log:
 //  (Version 1.1) Repaired mistake in GetTokens
@@ -11,6 +9,8 @@
 // Change log:
 //  (Version 1.2) Changed the definition of equality with regards
 //                to numeric tokens
+//
+// Final version by Sasha Rybalkina (2/1/2023)
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -59,6 +59,7 @@ namespace SpreadsheetUtilities
     {
         private ArrayList variables = new();
         private string formula = "";
+        private Func<string, string> normalizer;
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression 
         ///written as
@@ -126,6 +127,7 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string,
     bool> isValid)
         {
+            normalizer = normalize;
             List<string> formulaArray = (List<string>)GetTokens(formula);
             int lastIndex = formulaArray.Count() - 1;
             var left = formula.Count(x => x == '(');
@@ -257,6 +259,13 @@ namespace SpreadsheetUtilities
                 }
             }
         }
+        /// <summary>
+        /// Private helper method for adding and subtracting integers.
+        /// </summary>
+        /// <param name="value1">First integer for evaluation</param>
+        /// <param name="value2">Second integer for evaluation</param>
+        /// <param name="op">The operator to be used</param>
+        /// <returns></returns>
         private static int AddOrSubtract(int value1, int value2, string op)
         {
             if (op == "+")
@@ -268,6 +277,13 @@ namespace SpreadsheetUtilities
                 return value1 - value2;
             }
         }
+        /// <summary>
+        /// Private helper method for multiplying and dividing integers.
+        /// </summary>
+        /// <param name="value1">First integer for evaluation</param>
+        /// <param name="value2">Second integer for evaluation</param>
+        /// <param name="op">The operator to be used</param>
+        /// <returns></returns>
         private static int MultiplyOrDivide(int value1, int value2, string op)
         {
             if (op == "*")
@@ -341,7 +357,7 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token), OperatorStack.Pop()));
+                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(normalizer(token)), OperatorStack.Pop()));
                     }
                     else
                     {
