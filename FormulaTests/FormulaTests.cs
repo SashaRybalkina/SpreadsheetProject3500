@@ -9,7 +9,7 @@ public class UnitTest1
     /// This tests the Equals method. fomula and formula2 should be considered
     /// equal, and fomula and formula3 shouldn't be.
     /// </summary>
-    [TestMethod, time]
+    [TestMethod]
     public void TestEquals()
     {
         Formula formula = new Formula("1+6-7*2-(6/3+(8-4))");
@@ -24,12 +24,12 @@ public class UnitTest1
     /// and if an operator is next to an integer when it shouldn't be.
     /// </summary>
     [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void TestOperatorsExceptions()
     {
         Formula formula = new Formula("++");
         Formula formula2 = new Formula("-5");
         Formula formula3 = new Formula("5-");
-        //Assert.ThrowsException<string>(new Formula("++"));
     }
     /// <summary>
     /// This tests the exceptions that should be thrown when using parentheses.
@@ -39,6 +39,7 @@ public class UnitTest1
     /// an uneven amount of left and right parentheses.
     /// </summary>
     [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void TestParenthesesExceptions()
     {
         Formula formula1 = new Formula("()2");
@@ -55,6 +56,7 @@ public class UnitTest1
     /// occurs, or if a given variable isn't valid.
     /// </summary>
     [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
     public void TestVarAndIntExceptions()
     {
         Formula formula1 = new Formula("a2 y3");
@@ -91,8 +93,8 @@ public class UnitTest1
     [TestMethod]
     public void TestToString()
     {
-        Formula formula = new Formula("1+x6-7*2-(6/3+(y8-4))");
-        Assert.AreEqual(formula.ToString(), "1+x6-7*2-(6/3+(y8-4))");
+        Formula formula = new Formula("1.0+x6-7*2");
+        Assert.AreEqual("1.0+x6.0-7.0*2.0", formula.ToString());
     }
     /// <summary>
     /// This tests the GetHashCode method. The method should create a hash code
@@ -104,8 +106,8 @@ public class UnitTest1
     {
         Formula formula = new Formula("1+6");
         Formula formula2 = new Formula("x2 + X4 + Y7");
-        Assert.AreEqual(formula.GetHashCode(), 3);
-        Assert.AreEqual(formula2.GetHashCode(), 2);
+        Assert.AreEqual(3, formula.GetHashCode());
+        Assert.AreEqual(8, formula2.GetHashCode());
     }
     /// <summary>
     /// This tests the operators of the class. == should work exactly like the

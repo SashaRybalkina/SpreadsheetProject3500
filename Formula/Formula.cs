@@ -57,7 +57,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class Formula
     {
-        private ArrayList variables = new();
+        private List<string> variables = new();
         private string formula = "";
         private Func<string, string> normalizer;
         /// <summary>
@@ -128,7 +128,7 @@ namespace SpreadsheetUtilities
     bool> isValid)
         {
             normalizer = normalize;
-            List<string> formulaArray = (List<string>)GetTokens(formula);
+            List<string> formulaArray = GetTokens(formula).ToList();
             int lastIndex = formulaArray.Count() - 1;
             var left = formula.Count(x => x == '(');
             var right = formula.Count(x => x == ')');
@@ -163,10 +163,10 @@ namespace SpreadsheetUtilities
 
                 ///This if statement checks for all errors associated with integers. Two integers cannot be next to each other,
                 ///an integer cannot be right next to a variable, and an integer cannot be outside of parentheses.
-                else if (Int32.TryParse(formulaArray[i], result: out int intResult))
+                else if (Double.TryParse(formulaArray[i], result: out double Result))
                 {
                     ///If two integers are right next to each other, throws exception.
-                    if (i < lastIndex && (Int32.TryParse(formulaArray[next], result: out int intResult2)))
+                    if (i < lastIndex && (Double.TryParse(formulaArray[next], result: out Result)))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
@@ -181,7 +181,7 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
                     }
                     //Builds the formula string for later use.
-                    this.formula = this.formula + intResult;
+                    this.formula = this.formula + Result;
                 }
 
                 ///This if statement checks for all errors associated with the right parenthesis. An integer cannot be outside
@@ -189,7 +189,7 @@ namespace SpreadsheetUtilities
                 else if (formulaArray[i] == ")")
                 {
                     ///If an integer is outside of parentheses, throws an exception.
-                    if (i < lastIndex && Int32.TryParse(formulaArray[next], result: out int intResult2))
+                    if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
@@ -234,7 +234,7 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("The variable entered is not valid.");
                     }
                     ///If the variable is next to an integer, throws an exception.
-                    else if (i < lastIndex && Int32.TryParse(formulaArray[next], result: out int intResult2))
+                    else if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
@@ -266,7 +266,7 @@ namespace SpreadsheetUtilities
         /// <param name="value2">Second integer for evaluation</param>
         /// <param name="op">The operator to be used</param>
         /// <returns></returns>
-        private static int AddOrSubtract(int value1, int value2, string op)
+        private static double AddOrSubtract(double value1, double value2, string op)
         {
             if (op == "+")
             {
@@ -284,7 +284,7 @@ namespace SpreadsheetUtilities
         /// <param name="value2">Second integer for evaluation</param>
         /// <param name="op">The operator to be used</param>
         /// <returns></returns>
-        private static int MultiplyOrDivide(int value1, int value2, string op)
+        private static double MultiplyOrDivide(double value1, double value2, string op)
         {
             if (op == "*")
             {
@@ -326,8 +326,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            ArrayList expression = (ArrayList)GetTokens(formula);
-            Stack<int> ValueStack = new System.Collections.Generic.Stack<int>();
+            IEnumerable expression = GetTokens(formula);
+            Stack<Double> ValueStack = new System.Collections.Generic.Stack<Double>();
             Stack<string> OperatorStack = new System.Collections.Generic.Stack<string>();
             foreach (string token in expression)
             {
@@ -339,15 +339,15 @@ namespace SpreadsheetUtilities
                 }
                 ///This if statement determines if the string being worked with is an integer. If it is,
                 ///then checks how the integer should be treated based on the operators being used.
-                else if (Int32.TryParse(token, result: out int intResult))
+                else if (Double.TryParse(token, result: out double Result))
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), intResult, OperatorStack.Pop()));
+                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), Result, OperatorStack.Pop()));
                     }
                     else
                     {
-                        ValueStack.Push(intResult);
+                        ValueStack.Push(Result);
                     }
                 }
 
@@ -373,8 +373,8 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
-                        int value2 = ValueStack.Pop();
-                        int value1 = ValueStack.Pop();
+                        double value2 = ValueStack.Pop();
+                        double value1 = ValueStack.Pop();
                         ValueStack.Push(AddOrSubtract(value1, value2, OperatorStack.Pop()));
                     }
                     OperatorStack.Push(token);
@@ -386,8 +386,8 @@ namespace SpreadsheetUtilities
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
-                        int value2 = ValueStack.Pop();
-                        int value1 = ValueStack.Pop();
+                        double value2 = ValueStack.Pop();
+                        double value1 = ValueStack.Pop();
                         ValueStack.Push(AddOrSubtract(value1, value2, OperatorStack.Pop()));
                     }
 
@@ -395,21 +395,21 @@ namespace SpreadsheetUtilities
 
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
-                        int value2 = ValueStack.Pop();
-                        int value1 = ValueStack.Pop();
+                        double value2 = ValueStack.Pop();
+                        double value1 = ValueStack.Pop();
                         ValueStack.Push(MultiplyOrDivide(value1, value2, OperatorStack.Pop()));
                     }
                 }
             }
 
-            int result = 0;
+            double result = 0;
 
             ///If there is a remaining expression that didn't get resolved while the for loop
             ///was running, this is where this expression gets handled.
             if (ValueStack.Count() > 1)
             {
-                int value2 = ValueStack.Pop();
-                int value1 = ValueStack.Pop();
+                double value2 = ValueStack.Pop();
+                double value1 = ValueStack.Pop();
                 if (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/")
                 {
                     result = MultiplyOrDivide(value1, value2, OperatorStack.Pop());
@@ -444,7 +444,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public IEnumerable<String> GetVariables()
         {
-            return (IEnumerable<String>)variables;
+            return variables;
         }
         /// <summary>
         /// Returns a string containing no spaces which, if passed to the Formula
@@ -561,7 +561,7 @@ namespace SpreadsheetUtilities
             String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
             String spacePattern = @"\s+";
             // Overall pattern
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) |  ({ 5})",
+            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) |  ({5})",
             lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
             // Enumerate matching tokens that don't consist solely of white space.
             foreach (String s in Regex.Split(formula, pattern,
