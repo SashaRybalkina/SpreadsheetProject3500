@@ -20,7 +20,7 @@ public class UnitTest1
         Formula formula = new Formula("++");
         Formula formula2 = new Formula("-5");
         Formula formula3 = new Formula("5-");
-        //Assert.ThrowsException<string>(new Formula("++"));
+        Assert.ThrowsException<string>(new Formula("++"));
     }
     [TestMethod]
     public void TestParenthesesExceptions()

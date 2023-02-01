@@ -126,35 +126,27 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string,
     bool> isValid)
         {
-            string[] formulaArray = Regex.Split(formula, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)|()");
+            List<string> formulaArray = (List<string>)GetTokens(formula);
+            int lastIndex = formulaArray.Count() - 1;
             var left = formula.Count(x => x == '(');
             var right = formula.Count(x => x == ')');
             if (left != right) throw new FormulaFormatException("Cannot have open parentheses");
 
-            for (int i = 0; i < formulaArray.Length; i++)
+            for (int i = 0; i < lastIndex+1; i++)
             {
-                ///This skips over white space
-                if (formulaArray[i] == "")
-                {
-                    i++;
-                    if (i == formulaArray.Length)
-                    {
-                        break;
-                    }
-                }
-                ///This determines the index of the next token.
-                int next = determineNext(formulaArray, i);
+                ///The next index
+                int next = i + 1;
 
                 ///This if statement checks for all errors associated with operators. Two operators cannot be next to each other,
                 ///an operator cannot precede a right parenthesis, and a division by zero cannot occur.
                 if (formulaArray[i] == "+" || formulaArray[i] == "-" || formulaArray[i] == "*" || formulaArray[i] == "/")
                 {
-                    if (i == 0 || i == formulaArray.Count())
+                    if (i == 0 || i == lastIndex)
                     {
                         throw new FormulaFormatException("Cannot have trailing operators");
                     }
                     ///If an operator is right next to another operator or a right parenthesis, throws an exception.
-                    if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/" || formulaArray[next] == ")"))
+                    if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/" || formulaArray[next] == ")"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive opperators or an opperator outside of parentheses.");
                     }
@@ -172,17 +164,17 @@ namespace SpreadsheetUtilities
                 else if (Int32.TryParse(formulaArray[i], result: out int intResult))
                 {
                     ///If two integers are right next to each other, throws exception.
-                    if (i < formulaArray.Length - 1 && (Int32.TryParse(formulaArray[next], result: out int intResult2)))
+                    if (i < lastIndex && (Int32.TryParse(formulaArray[next], result: out int intResult2)))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
                     ///If an integer is next to a variable, throws an exception.
-                    else if (i < formulaArray.Length - 1 && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
                     ///If an integer is outside of parentheses, throws an exception.
-                    else if (i < formulaArray.Length - 1 && (formulaArray[next] == "("))
+                    else if (i < lastIndex && (formulaArray[next] == "("))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
                     }
@@ -195,17 +187,17 @@ namespace SpreadsheetUtilities
                 else if (formulaArray[i] == ")")
                 {
                     ///If an integer is outside of parentheses, throws an exception.
-                    if (i < formulaArray.Length - 1 && Int32.TryParse(formulaArray[next], result: out int intResult2))
+                    if (i < lastIndex && Int32.TryParse(formulaArray[next], result: out int intResult2))
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
                     ///If a variable is right outside of a parenthesis, throws an exception.
-                    else if (i < formulaArray.Length - 1 && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
                     ///If an operator is right outside of a parenthesis, throws an exception.
-                    else if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
+                    else if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
@@ -213,13 +205,15 @@ namespace SpreadsheetUtilities
                     this.formula = this.formula + formulaArray[i];
                 }
 
+                ///This if statement checks for all errors associated with the left parenthesis. An operator cannot come after a
+                ///right parenthesis and closed parentheses cannot be empty.
                 else if (formulaArray[i] == "(")
                 {
-                    if (i < formulaArray.Length - 1 && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
+                    if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have an operator after a left parenthesis.");
                     }
-                    if (i < formulaArray.Length - 1 && (formulaArray[next] == ")"))
+                    if (i < lastIndex && (formulaArray[next] == ")"))
                     {
                         throw new FormulaFormatException("Cannot have empty parentheses.");
                     }
@@ -238,17 +232,17 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("The variable entered is not valid.");
                     }
                     ///If the variable is next to an integer, throws an exception.
-                    else if (i < formulaArray.Length - 1 && Int32.TryParse(formulaArray[next], result: out int intResult2))
+                    else if (i < lastIndex && Int32.TryParse(formulaArray[next], result: out int intResult2))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
                     ///If the variable is next to another variable, throws an exception.
-                    else if (i < formulaArray.Length - 1 && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive variables in expression");
                     }
                     ///If the variable is outised of parentheses, throws an exception.
-                    else if (i < formulaArray.Length - 1 && formulaArray[next] == "(")
+                    else if (i < lastIndex && formulaArray[next] == "(")
                     {
                         throw new FormulaFormatException("Cannot have a variable outised of parentheses");
                     }
@@ -330,7 +324,7 @@ namespace SpreadsheetUtilities
 
                 ///Repeats the process of the previous if statement, except with variables. A
                 ///delegate is used to look up the value of a variable so that it can be evaluated.
-                else if (token != ")" && token != "-" && token != "+")
+                else if (Regex.IsMatch(token, "[a-z|A-Z][0-9]"))
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
                     {
@@ -356,7 +350,7 @@ namespace SpreadsheetUtilities
                 ///a "+" or "-" at the top of the operator stack, then two integers from the
                 ///value stack are evaluated using one of the operators. The operator then gets
                 ///pushed onto the operator stack.
-                if (token == "+" || token == "-")
+                else if (token == "+" || token == "-")
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
@@ -375,7 +369,7 @@ namespace SpreadsheetUtilities
 
                 ///This if statement works with right parentheses. It evaluates the integers in the
                 ///value stack depending on the operator at the top of the operator stack.
-                if (token == ")")
+                else if (token == ")")
                 {
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
                     {
