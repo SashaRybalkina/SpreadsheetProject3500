@@ -156,7 +156,7 @@ public class UnitTest1
     public void TestEvaluateWithNormalize()
     {
         Formula formula = new Formula("1+x6-7*X6", normalize, IsValid);
-        Assert.AreEqual((double)-29, formula.Evaluate(s => 5));
+        Assert.AreEqual((double)-17, formula.Evaluate(lookup));
     }
     /// <summary>
     /// This tests the GetVariables method. The formula given has the variables
@@ -235,10 +235,28 @@ public class UnitTest1
         Assert.IsFalse(formula != formula2);
     }
     /// <summary>
+    /// This tests the operators of the class. == should work exactly like the
+    /// Equals method, and != should work as the opposite of the Equals method.
+    /// </summary>
+    [TestMethod, Timeout(5000)]
+    public void StressTest()
+    {
+        Formula formula = new Formula("4+6 *6- 0");
+        Formula formula2 = new Formula("4+6.0 * 6E+0 -0");
+        Formula formula3 = new Formula("10 * 2+ 7*3 - 1");
+        Assert.IsTrue(formula == formula2);
+        Assert.IsTrue(formula != formula3);
+        object form1Eval = formula.Evaluate(s => 5);
+        object form2Eval = formula2.Evaluate(s => 5);
+        object form3Eval = formula3.Evaluate(s => 5);
+        Assert.AreEqual((double)form1Eval, (double)form3Eval);
+        Assert.AreEqual((double)form2Eval, (double)form3Eval);
+    }
+    /// <summary>
     /// This creates the "normalize" delegate.
     /// </summary>
     /// <param name="x">The variable to be capitalized</param>
-    /// <returns>A capitalized string</returns>
+    /// <returns>A capitalized variable</returns>
     private static string Capitalize(string x)
     {
         string output = "";
@@ -253,6 +271,11 @@ public class UnitTest1
         }
         return output;
     }
+    /// <summary>
+    /// This creates the "IsValid" delegate.
+    /// </summary>
+    /// <param name="x">The variable being checked</param>
+    /// <returns>True if the variable is valid, false otherwise.</returns>
     private static bool isvalid(string x)
     {
         if (Regex.IsMatch(x, "[a-z|A-Z][0-9]"))
@@ -261,6 +284,23 @@ public class UnitTest1
         }
         return false;
     }
+    /// <summary>
+    /// This craetes the "Lookup" delegate.
+    /// </summary>
+    /// <param name="x">The variable being looked up</param>
+    /// <returns>An integer value for a given variable</returns>
+    private static double Lookup(string x)
+    {
+        if (x == "x6")
+        {
+            return 5;
+        }
+        else
+        {
+            return 3;
+        }
+    }
+    Func<string, double> lookup = Lookup;
     Func<string, string> normalize = Capitalize;
     Func<string, bool> IsValid = isvalid;
 }
