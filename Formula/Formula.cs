@@ -58,8 +58,8 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         private List<string> variables = new();
+        private List<string> tokens = new();
         private string formula = "";
-        private Func<string, string> normalizer;
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression 
         ///written as
@@ -127,7 +127,6 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string,
     bool> isValid)
         {
-            normalizer = normalize;
             List<string> formulaArray = GetTokens(formula).ToList();
             int lastIndex = formulaArray.Count() - 1;
             var left = formula.Count(x => x == '(');
@@ -157,8 +156,9 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot divide by zero");
                     }
-                    ///Builds the formula string for later use.
+                    ///Builds the formula string and tokens list for later use.
                     this.formula = this.formula + formulaArray[i];
+                    tokens.Add(formulaArray[i]);
                 }
 
                 ///This if statement checks for all errors associated with integers. Two integers cannot be next to each other,
@@ -180,8 +180,9 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
                     }
-                    //Builds the formula string for later use.
+                    //Builds the formula string and tokens list for later use.
                     this.formula = this.formula + Result;
+                    tokens.Add(""+Result);
                 }
 
                 ///This if statement checks for all errors associated with the right parenthesis. An integer cannot be outside
@@ -203,8 +204,9 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
-                    //Builds the formula string for later use.
-                    this.formula = this.formula + formulaArray[i];
+                    //Builds the formula string and tokens list for later use.
+                    this.formula = this.formula + Result;
+                    tokens.Add(formulaArray[i]);
                 }
 
                 ///This if statement checks for all errors associated with the left parenthesis. An operator cannot come after a
@@ -219,6 +221,9 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have empty parentheses.");
                     }
+                    //Builds the formula string and tokens list for later use.
+                    this.formula = this.formula + Result;
+                    tokens.Add(normalize(formulaArray[i]));
                 }
 
                 else
@@ -254,8 +259,9 @@ namespace SpreadsheetUtilities
                     {
                         variables.Add(normalize(formulaArray[i]));
                     }
-                    //Builds the formula string for later use.
-                    this.formula = this.formula + formulaArray[i];
+                    //Builds the formula string and tokens list for later use.
+                    this.formula = this.formula + Result;
+                    tokens.Add(normalize(formulaArray[i]));
                 }
             }
         }
@@ -265,7 +271,7 @@ namespace SpreadsheetUtilities
         /// <param name="value1">First integer for evaluation</param>
         /// <param name="value2">Second integer for evaluation</param>
         /// <param name="op">The operator to be used</param>
-        /// <returns></returns>
+        /// <returns>The evaluation of the two integers</returns>
         private static double AddOrSubtract(double value1, double value2, string op)
         {
             if (op == "+")
@@ -283,7 +289,7 @@ namespace SpreadsheetUtilities
         /// <param name="value1">First integer for evaluation</param>
         /// <param name="value2">Second integer for evaluation</param>
         /// <param name="op">The operator to be used</param>
-        /// <returns></returns>
+        /// <returns>The evaluation of the two integers</returns>
         private static double MultiplyOrDivide(double value1, double value2, string op)
         {
             if (op == "*")
@@ -326,10 +332,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            IEnumerable expression = GetTokens(formula);
             Stack<Double> ValueStack = new System.Collections.Generic.Stack<Double>();
             Stack<string> OperatorStack = new System.Collections.Generic.Stack<string>();
-            foreach (string token in expression)
+            if (lookup == null)
+            {
+                return new FormulaError();
+            }
+            foreach (string token in tokens)
             {
                 ///This if statement sets up the operator stack for later use. Only the "(", "*" and "/"
                 ///operators should be added to the stack
@@ -355,13 +364,20 @@ namespace SpreadsheetUtilities
                 ///delegate is used to look up the value of a variable so that it can be evaluated.
                 else if (Regex.IsMatch(token, "[a-z|A-Z][0-9]"))
                 {
-                    if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
+                    try
                     {
-                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(normalizer(token)), OperatorStack.Pop()));
+                        if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
+                        {
+                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token), OperatorStack.Pop()));
+                        }
+                        else
+                        {
+                            ValueStack.Push((int)lookup(token));
+                        }
                     }
-                    else
+                    catch
                     {
-                        ValueStack.Push((int)lookup(token));
+                        return new FormulaError();
                     }
                 }
 
@@ -539,7 +555,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     public override int GetHashCode()
         {
-            return formula.Length%10;
+            return formula.GetHashCode();
         }
         /// <summary>
         /// Given an expression, enumerates the tokens that compose it.  Tokens are 
