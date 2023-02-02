@@ -36,7 +36,8 @@ public class UnitTest1
     /// <summary>
     /// This tests the exceptions that should be thrown when using operators.
     /// An exception should be thrown if there are two consecutive operators,
-    /// and if an operator is next to an integer when it shouldn't be.
+    /// if a division by zero occurs, and if an operator is next to an integer
+    /// when it shouldn't be.
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
@@ -44,19 +45,26 @@ public class UnitTest1
     {
         Formula formula = new Formula("++");
     }
-    //Exception tests continued
+    //Exception test for a negative number entered
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestOperatorsExceptions2()
     {
         Formula formula = new Formula("-5");
     }
-    //Exception tests continued
+    //Exception test for an operator at last index
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestOperatorsExceptions3()
     {
         Formula formula = new Formula("5-");
+    }
+    //Exception test for division by zero
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestoperatorstExceptions4()
+    {
+        Formula formula3 = new Formula("6/0");
     }
     /// <summary>
     /// This tests the exceptions that should be thrown when using parentheses.
@@ -106,13 +114,25 @@ public class UnitTest1
     {
         Formula formula = new Formula("()");
     }
+    //Exception tests for variables outside of parentheses
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions7()
+    {
+        Formula formula = new Formula("()x2");
+    }
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions8()
+    {
+        Formula formula = new Formula("y3()");
+    }
     /// <summary>
     /// This tests the exceptions that should be thrown when using variables
     /// and integers. An exception should be thrown if there are two consecutive
-    /// variables, if there are two consecutive integers, if a division by zero
-    /// occurs, or if a given variable isn't valid.
+    /// variables, if there are two consecutive integers, if an integer is next
+    /// to a variable, or if a given variable isn't valid.
     /// </summary>
-    //Exception test for consecutive variables
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestVarAndIntExceptions()
@@ -126,19 +146,25 @@ public class UnitTest1
     {
         Formula formula2 = new Formula("5 32");
     }
-    //Exception test for division by zero
+    //Exception test for invalid variable
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestVarAndIntExceptions3()
     {
-        Formula formula3 = new Formula("6/0");
+        Formula formula4 = new Formula("xx");
     }
-    //Exception test for invalid variable
+    //Exception tests for a variable next to an integer
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestVarAndIntExceptions4()
     {
-        Formula formula4 = new Formula("xx");
+        Formula formula4 = new Formula("x3 56");
+    }
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestVarAndIntExceptions5()
+    {
+        Formula formula4 = new Formula("56 x3");
     }
     /// <summary>
     /// this tests the Evaluate method. The formula given should evaluate to -6.
