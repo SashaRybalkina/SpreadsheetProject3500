@@ -112,13 +112,32 @@ public class UnitTest1
     /// variables, if there are two consecutive integers, if a division by zero
     /// occurs, or if a given variable isn't valid.
     /// </summary>
+    //Exception test for consecutive variables
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestVarAndIntExceptions()
     {
         Formula formula1 = new Formula("a2 y3");
+    }
+    //Exception test for consecutive integers
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestVarAndIntExceptions2()
+    {
         Formula formula2 = new Formula("5 32");
+    }
+    //Exception test for division by zero
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestVarAndIntExceptions3()
+    {
         Formula formula3 = new Formula("6/0");
+    }
+    //Exception test for invalid variable
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestVarAndIntExceptions4()
+    {
         Formula formula4 = new Formula("xx");
     }
     /// <summary>
@@ -173,8 +192,8 @@ public class UnitTest1
     [TestMethod]
     public void TestToString()
     {
-        Formula formula = new Formula("1.0+x6-7*2");
-        Assert.AreEqual("1.0+x6.0-7.0*2.0", formula.ToString());
+        Formula formula = new Formula("1.0+x6-7E+0*2.0");
+        Assert.AreEqual("1+x6-7*2", formula.ToString());
     }
     /// <summary>
     /// This tests the ToString method. The string returned should be the same
@@ -183,8 +202,8 @@ public class UnitTest1
     [TestMethod]
     public void TestToStringWithNormalize()
     {
-        Formula formula = new Formula("1.0+x6-7*y2", normalize, IsValid);
-        Assert.AreEqual("1.0+X6.0-7.0*Y2", formula.ToString());
+        Formula formula = new Formula("2E+2+x6-7*y2", normalize, IsValid);
+        Assert.AreEqual("200+X6-7*Y2", formula.ToString());
     }
     /// <summary>
     /// This tests the GetHashCode method. The method should create a hash code

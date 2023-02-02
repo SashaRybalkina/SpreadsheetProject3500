@@ -128,7 +128,7 @@ namespace SpreadsheetUtilities
         {
             if (formula == null || formula == "")
             {
-                throw new FormulaFormatException("Cannot have open parentheses");
+                throw new FormulaFormatException("Cannot have a null or empty formula");
             }
             List<string> formulaArray = GetTokens(formula).ToList();
             int lastIndex = formulaArray.Count() - 1;
@@ -170,22 +170,19 @@ namespace SpreadsheetUtilities
                 ///an integer cannot be right next to a variable, and an integer cannot be outside of parentheses.
                 else if (Double.TryParse(formulaArray[i], result: out double Result))
                 {
-                    ///If two integers are right next to each other, throws exception.
                     if (i < lastIndex && (Double.TryParse(formulaArray[next], result: out double Result2)))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
-                    ///If an integer is next to a variable, throws an exception.
                     else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
-                    ///If an integer is outside of parentheses, throws an exception.
                     else if (i < lastIndex && (formulaArray[next] == "("))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
                     }
-                    //Builds the formula string and tokens list for later use.
+
                     this.formula = this.formula + Result;
                     tokens.Add(""+Result);
                 }
@@ -194,22 +191,19 @@ namespace SpreadsheetUtilities
                 ///of parentheses, a variable caanot be outside of parentheses, and an operator cannot be outside of parentheses.
                 else if (formulaArray[i] == ")")
                 {
-                    ///If an integer is outside of parentheses, throws an exception.
                     if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
-                    ///If a variable is right outside of a parenthesis, throws an exception.
                     else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
-                    ///If an operator is right outside of a parenthesis, throws an exception.
                     else if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
-                    //Builds the formula string and tokens list for later use.
+
                     this.formula = this.formula + formulaArray[i];
                     tokens.Add(formulaArray[i]);
                 }
@@ -226,45 +220,40 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have empty parentheses.");
                     }
-                    //Builds the formula string and tokens list for later use.
+
                     this.formula = this.formula + formulaArray[i];
                     tokens.Add(normalize(formulaArray[i]));
                 }
 
+                ///This is where all errors associated with variables are handled. If a variable is invalid, or is next to another
+                ///variable or integer, or if the variable is outside of parentheses, throws an exception.
                 else
                 {
-                    ///If the variable passed in is not a proper variable, throws an exception.
                     if (!Regex.IsMatch(formulaArray[i], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("The variable entered must have one integer and one character.");
                     }
-                    ///If the variable is not valid, throws an exception.
                     else if (!isValid(normalize(formulaArray[i])))
                     {
                         throw new FormulaFormatException("The variable entered is not valid.");
                     }
-                    ///If the variable is next to an integer, throws an exception.
                     else if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
-                    ///If the variable is next to another variable, throws an exception.
                     else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive variables in expression");
                     }
-                    ///If the variable is outised of parentheses, throws an exception.
                     else if (i < lastIndex && formulaArray[next] == "(")
                     {
                         throw new FormulaFormatException("Cannot have a variable outised of parentheses");
                     }
 
-                    ///This builds the variables list for later use
                     if (!variables.Contains(normalize(formulaArray[i])))
                     {
                         variables.Add(normalize(formulaArray[i]));
                     }
-                    //Builds the formula string and tokens list for later use.
                     this.formula = this.formula + normalize(formulaArray[i]);
                     tokens.Add(normalize(formulaArray[i]));
                 }
@@ -276,7 +265,7 @@ namespace SpreadsheetUtilities
         /// <param name="value1">First integer for evaluation</param>
         /// <param name="value2">Second integer for evaluation</param>
         /// <param name="op">The operator to be used</param>
-        /// <returns>The evaluation of the two integers</returns>
+        /// <returns>The evaluation of the two integers based on the operator given.</returns>
         private static double AddOrSubtract(double value1, double value2, string op)
         {
             if (op == "+")
