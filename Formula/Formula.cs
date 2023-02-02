@@ -124,15 +124,20 @@ namespace SpreadsheetUtilities
         /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is 
         /// syntactically incorrect.
         /// </summary>
-        public Formula(String formula, Func<string, string> normalize, Func<string,
-    bool> isValid)
+        public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            if (formula == null || formula == "")
+            {
+                throw new FormulaFormatException("Cannot have open parentheses");
+            }
             List<string> formulaArray = GetTokens(formula).ToList();
             int lastIndex = formulaArray.Count() - 1;
             var left = formula.Count(x => x == '(');
             var right = formula.Count(x => x == ')');
-            if (left != right) throw new FormulaFormatException("Cannot have open parentheses");
-
+            if (left != right)
+            {
+                throw new FormulaFormatException("Cannot have open parentheses");
+            }
             for (int i = 0; i < lastIndex+1; i++)
             {
                 ///The next index
@@ -166,7 +171,7 @@ namespace SpreadsheetUtilities
                 else if (Double.TryParse(formulaArray[i], result: out double Result))
                 {
                     ///If two integers are right next to each other, throws exception.
-                    if (i < lastIndex && (Double.TryParse(formulaArray[next], result: out Result)))
+                    if (i < lastIndex && (Double.TryParse(formulaArray[next], result: out double Result2)))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
@@ -205,7 +210,7 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
                     //Builds the formula string and tokens list for later use.
-                    this.formula = this.formula + Result;
+                    this.formula = this.formula + formulaArray[i];
                     tokens.Add(formulaArray[i]);
                 }
 
@@ -222,7 +227,7 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("Cannot have empty parentheses.");
                     }
                     //Builds the formula string and tokens list for later use.
-                    this.formula = this.formula + Result;
+                    this.formula = this.formula + formulaArray[i];
                     tokens.Add(normalize(formulaArray[i]));
                 }
 
@@ -260,7 +265,7 @@ namespace SpreadsheetUtilities
                         variables.Add(normalize(formulaArray[i]));
                     }
                     //Builds the formula string and tokens list for later use.
-                    this.formula = this.formula + Result;
+                    this.formula = this.formula + normalize(formulaArray[i]);
                     tokens.Add(normalize(formulaArray[i]));
                 }
             }

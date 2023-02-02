@@ -43,8 +43,20 @@ public class UnitTest1
     public void TestOperatorsExceptions()
     {
         Formula formula = new Formula("++");
-        Formula formula2 = new Formula("-5");
-        Formula formula3 = new Formula("5-");
+    }
+    //Exception tests continued
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestOperatorsExceptions2()
+    {
+        Formula formula = new Formula("-5");
+    }
+    //Exception tests continued
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestOperatorsExceptions3()
+    {
+        Formula formula = new Formula("5-");
     }
     /// <summary>
     /// This tests the exceptions that should be thrown when using parentheses.
@@ -57,12 +69,42 @@ public class UnitTest1
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestParenthesesExceptions()
     {
-        Formula formula1 = new Formula("()2");
-        Formula formula2 = new Formula("3()");
-        Formula formula3 = new Formula("(-)");
-        Formula formula4 = new Formula("(5-)");
-        Formula formula5 = new Formula("(()");
-        Formula formula6 = new Formula("()");
+        Formula formula = new Formula("()2");
+    }
+    //Exception test for integer outside of parentheses
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions2()
+    {
+        Formula formula = new Formula("3()");
+    }
+    //Exception test for operator is in front of a left parenthesis
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions3()
+    {
+        Formula formula = new Formula("(-)");
+    }
+    //Exception test operator is behind a right parentheses
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions4()
+    {
+        Formula formula = new Formula("(5-)");
+    }
+    //Exception test for unbalanced parentheses
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions5()
+    {
+        Formula formula = new Formula("(()");
+    }
+    //Exception test for empty parentheses
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestParenthesesExceptions6()
+    {
+        Formula formula = new Formula("()");
     }
     /// <summary>
     /// This tests the exceptions that should be thrown when using variables
@@ -85,8 +127,8 @@ public class UnitTest1
     [TestMethod]
     public void TestEvaluate()
     {
-        Formula formula = new Formula("1+6-7*2-(6/3+(8-4))");
-        Assert.AreEqual((double)-6, formula.Evaluate(s => 5));
+        Formula formula = new Formula("1+6-7*2-(6/3+(8-4))"); 
+        Assert.AreEqual((double)-13, formula.Evaluate(s => 5));
     }
     /// <summary>
     /// this tests the Evaluate method. The formula given should evaluate to -5.
