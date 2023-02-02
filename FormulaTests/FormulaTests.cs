@@ -34,6 +34,22 @@ public class UnitTest1
         Assert.IsFalse(formula.Equals(formula3));
     }
     /// <summary>
+    /// This tests the exceptions that should be thrown if a null or empty formula
+    /// is given.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestEmptyFormulaException()
+    {
+        Formula formula = new Formula("");
+    }
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestNullFormulaException()
+    {
+        Formula formula = new Formula(null);
+    }
+    /// <summary>
     /// This tests the exceptions that should be thrown when using operators.
     /// An exception should be thrown if there are two consecutive operators,
     /// if a division by zero occurs, and if an operator is next to an integer
