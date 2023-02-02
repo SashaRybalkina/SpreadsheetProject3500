@@ -9,8 +9,8 @@
 // Change log:
 //  (Version 1.2) Changed the definition of equality with regards
 //                to numeric tokens
-//
-// Final version by Sasha Rybalkina (2/1/2023)
+// Final version written by Sasha Rybalkina, Febuary 2023
+// Version 2 (2/2/2023)
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,32 +28,13 @@ using static System.Net.Mime.MediaTypeNames;
 namespace SpreadsheetUtilities
 {
     /// <summary>
-    /// Represents formulas written in standard infix notation using standard 
-    ///precedence
-    /// rules.  The allowed symbols are non-negative numbers written using double-
-    ///precision
-    /// floating-point syntax (without unary preceeding '-' or '+'); 
-    /// variables that consist of a letter or underscore followed by 
-    /// zero or more letters, underscores, or digits; parentheses; and the four 
-    ///operator
-    /// symbols +, -, *, and /.  
-    /// 
-    /// Spaces are significant only insofar that they delimit tokens.  For example, 
-    ///"xy" is
-    /// a single variable, "x y" consists of two variables "x" and y; "x23" is a 
-    ///single variable;
-    /// and "x 23" consists of a variable "x" and a number "23".
-    /// 
-    /// Associated with every formula are two delegates:  a normalizer and a 
-    ///validator.The
-    /// normalizer is used to convert variables into a canonical form, and the 
-    ///validator is used
-    /// to add extra restrictions on the validity of a variable (beyond the standard 
-    ///requirement
-    /// that it consist of a letter or underscore followed by zero or more letters, 
-    ///underscores,
-    /// or digits.)  Their use is described in detail in the constructor and method 
-    ///comments.
+    /// This class takes in a string formula and evaluates the formula by splitting
+    /// it into string tokens and then parsing and normalizing all doubles and variables.
+    /// This class can be compared with the "==" and "!=" operators, which act as an
+    /// alternative to the Equals method for this class and as an alternative to !Equals.
+    /// This class also contains a ToString method, which returns the infix expression
+    /// given with all numerical values parsed into doubles and all variables normalized
+    /// according to the rules of the "normalize" delegate provided.
     /// </summary>
     public class Formula
     {
@@ -61,69 +42,30 @@ namespace SpreadsheetUtilities
         private List<string> tokens = new();
         private string formula = "";
         /// <summary>
-        /// Creates a Formula from a string that consists of an infix expression 
-        ///written as
-        /// described in the class comment.  If the expression is syntactically 
-        /// invalid,
-        /// throws a FormulaFormatException with an explanatory Message.
-        /// 
-        /// The associated normalizer is the identity function, and the associated 
-        /// validator
-        /// maps every string to true.  
+        /// This is the constructor that is used if a user provides a string expression
+        /// without providing any delegates. The constructor is responsible for checking
+        /// for syntax errors in the expression provided and throws an exception whenever
+        /// such an error is found. The constructor also builds the string that is
+        /// meant to represent the Formula class in string form, as well as building a
+        /// list for all of the variables and a list for all of the tokens in the given
+        /// expressoion after being parsed and normalized for later use.
         /// </summary>
+        /// <param name="formula">The string expression given</param>
         public Formula(String formula) :
             this(formula, s => s, s => true)
         {
         }
         /// <summary>
-        /// This is a private helper method for determining the index of the
-        /// next token in the formula.
+        /// This is the constructor that is used if a user provides a delegate for
+        /// normalizing a variable and a delegate for checking if the normalized
+        /// variable is valid as well as providig a string expression. It functions
+        /// exactly like the first constructor above.
         /// </summary>
-        /// <param name="array">The formula tokens</param>
-        /// <param name="index">The current index</param>
-        /// <returns></returns>
-        private static int determineNext(string[] array, int index)
-        {
-            if (array[index + 1] == "")
-            {
-                return index + 2;
-            }
-            else
-            {
-                return index + 1;
-            }
-        }
-        /// <summary>
-        /// Creates a Formula from a string that consists of an infix expression 
-        /// written as
-        /// described in the class comment.  If the expression is syntactically 
-        /// incorrect,
-        /// throws a FormulaFormatException with an explanatory Message.
-        /// 
-        /// The associated normalizer and validator are the second and third 
-        /// parameters,
-        /// respectively.  
-        /// 
-        /// If the formula contains a variable v such that normalize(v) is not a legal 
-        /// variable, 
-        /// throws a FormulaFormatException with an explanatory message. 
-        /// 
-        /// If the formula contains a variable v such that isValid(normalize(v)) is 
-        /// false,
-        /// throws a FormulaFormatException with an explanatory message.
-        /// 
-        /// Suppose that N is a method that converts all the letters in a string to 
-        /// upper case, and
-        /// that V is a method that returns true only if a string consists of one 
-        /// letter followed
-        /// by one digit.  Then:
-        /// 
-        /// new Formula("x2+y3", N, V) should succeed
-        /// new Formula("x+y3", N, V) should throw an exception, since V(N("x")) is 
-        /// false
-        /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is 
-        /// syntactically incorrect.
-        /// </summary>
+        /// <param name="formula">The string expression given</param>
+        /// <param name="normalize">The delegate for normalizing all variables</param>
+        /// <param name="isValid">The delegate for checking is a normalization of a
+        /// variable is valid</param>
+        /// <exception cref="FormulaFormatException"></exception>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             if (formula == null || formula == "")
@@ -136,28 +78,28 @@ namespace SpreadsheetUtilities
             var right = formula.Count(x => x == ')');
             if (left != right)
             {
-                throw new FormulaFormatException("Cannot have open parentheses");
+                throw new FormulaFormatException("Cannot have open or unbalanced parentheses");
             }
             for (int i = 0; i < lastIndex + 1; i++)
             {
-                ///The next index
-                int next = i + 1;
-
-                ///This if statement checks for all errors associated with operators. Two operators cannot be next to each other,
-                ///an operator cannot precede a right parenthesis, and a division by zero cannot occur.
+                ///This if statement checks for all errors associated with operators.
+                ///Two operators cannot be next to each other, an operator cannot
+                ///precede a right parenthesis, and a division by zero cannot occur.
                 if (formulaArray[i] == "+" || formulaArray[i] == "-" || formulaArray[i] == "*" || formulaArray[i] == "/")
                 {
                     if (i == 0 || i == lastIndex)
                     {
                         throw new FormulaFormatException("Cannot have trailing operators");
                     }
-                    ///If an operator is right next to another operator or a right parenthesis, throws an exception.
-                    if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/" || formulaArray[next] == ")"))
+                    ///If an operator is right next to another operator or a right
+                    ///parenthesis, throws an exception.
+                    if (i < lastIndex && (formulaArray[i + 1] == "+" || formulaArray[i + 1] == "-" ||
+                                          formulaArray[i + 1] == "*" || formulaArray[i + 1] == "/" || formulaArray[i + 1] == ")"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive opperators or an opperator outside of parentheses.");
                     }
                     ///If a division by zero occurs, throws an exception.
-                    if (formulaArray[i] == "/" && formulaArray[next] == "0")
+                    if (formulaArray[i] == "/" && formulaArray[i + 1] == "0")
                     {
                         throw new FormulaFormatException("Cannot divide by zero");
                     }
@@ -166,40 +108,44 @@ namespace SpreadsheetUtilities
                     tokens.Add(formulaArray[i]);
                 }
 
-                ///This if statement checks for all errors associated with integers. Two integers cannot be next to each other,
-                ///an integer cannot be right next to a variable, and an integer cannot be outside of parentheses.
+                ///This if statement checks for all errors associated with integers.
+                ///Two integers cannot be next to each other, an integer cannot be right
+                ///next to a variable, and an integer cannot be outside of parentheses.
                 else if (Double.TryParse(formulaArray[i], result: out double Result))
                 {
-                    if (i < lastIndex && (Double.TryParse(formulaArray[next], result: out double Result2)))
+                    if (i < lastIndex && (Double.TryParse(formulaArray[i + 1], result: out double Result2)))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
-                    else if (i < lastIndex && (formulaArray[next] == "("))
+                    else if (i < lastIndex && (formulaArray[i + 1] == "("))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outside of parentheses.");
                     }
 
                     this.formula = this.formula + Result;
-                    tokens.Add("" + Result);
+                    tokens.Add(formulaArray[i]);
                 }
 
-                ///This if statement checks for all errors associated with the right parenthesis. An integer cannot be outside
-                ///of parentheses, a variable caanot be outside of parentheses, and an operator cannot be outside of parentheses.
+                ///This if statement checks for all errors associated with the right
+                ///parenthesis. An integer cannot be outside of parentheses, a variable
+                ///caanot be outside of parentheses, and an operator cannot be outside
+                ///of parentheses.
                 else if (formulaArray[i] == ")")
                 {
-                    if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
+                    if (i < lastIndex && Double.TryParse(formulaArray[i + 1], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
-                    else if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
+                    else if (i < lastIndex && (formulaArray[i + 1] == "+" || formulaArray[i + 1] == "-" ||
+                                               formulaArray[i + 1] == "*" || formulaArray[i + 1] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
                     }
@@ -208,15 +154,17 @@ namespace SpreadsheetUtilities
                     tokens.Add(formulaArray[i]);
                 }
 
-                ///This if statement checks for all errors associated with the left parenthesis. An operator cannot come after a
-                ///right parenthesis and closed parentheses cannot be empty.
+                ///This if statement checks for all errors associated with the left
+                ///parenthesis. An operator cannot come after a right parenthesis
+                ///and closed parentheses cannot be empty.
                 else if (formulaArray[i] == "(")
                 {
-                    if (i < lastIndex && (formulaArray[next] == "+" || formulaArray[next] == "-" || formulaArray[next] == "*" || formulaArray[next] == "/"))
+                    if (i < lastIndex && (formulaArray[i + 1] == "+" || formulaArray[i + 1] == "-" ||
+                                          formulaArray[i + 1] == "*" || formulaArray[i + 1] == "/"))
                     {
                         throw new FormulaFormatException("Cannot have an operator after a left parenthesis.");
                     }
-                    if (i < lastIndex && (formulaArray[next] == ")"))
+                    if (i < lastIndex && (formulaArray[i + 1] == ")"))
                     {
                         throw new FormulaFormatException("Cannot have empty parentheses.");
                     }
@@ -225,8 +173,9 @@ namespace SpreadsheetUtilities
                     tokens.Add(normalize(formulaArray[i]));
                 }
 
-                ///This is where all errors associated with variables are handled. If a variable is invalid, or is next to another
-                ///variable or integer, or if the variable is outside of parentheses, throws an exception.
+                ///This is where all errors associated with variables are handled.
+                ///If a variable is invalid, or is next to another variable or integer,
+                ///or if the variable is outside of parentheses, throws an exception.
                 else
                 {
                     if (!Regex.IsMatch(formulaArray[i], "[a-z|A-Z][0-9]"))
@@ -237,15 +186,15 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("The variable entered is not valid.");
                     }
-                    else if (i < lastIndex && Double.TryParse(formulaArray[next], result: out Result))
+                    else if (i < lastIndex && Double.TryParse(formulaArray[i + 1], result: out Result))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[next], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive variables in expression");
                     }
-                    else if (i < lastIndex && formulaArray[next] == "(")
+                    else if (i < lastIndex && formulaArray[i + 1] == "(")
                     {
                         throw new FormulaFormatException("Cannot have a variable outised of parentheses");
                     }
@@ -296,10 +245,14 @@ namespace SpreadsheetUtilities
             }
         }
         /// <summary>
-        /// 
+        /// This method evaluates the expression that was provided in the constructor
+        /// by putting the doubles and operators into two seperate stacks and then
+        /// popping the stacks when the evaluating algorithm calls for it. If a token
+        /// in the formula is a variable, then its numerical value will be looked up
+        /// by using the "lookup" delegate and parsed as a double.
         /// </summary>
         /// <param name="lookup">The delegate for looking up the values of variables</param>
-        /// <returns></returns>
+        /// <returns>The evaluation of the formula given in the constructor</returns>
         public object Evaluate(Func<string, double> lookup)
         {
             Stack<Double> ValueStack = new System.Collections.Generic.Stack<Double>();
@@ -320,7 +273,8 @@ namespace SpreadsheetUtilities
                 ///then checks how the integer should be treated based on the operators being used.
                 else if (Double.TryParse(token, result: out double Result))
                 {
-                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
+                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
+                        OperatorStack.Peek() == "/"))
                     {
                         ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), Result, OperatorStack.Pop()));
                     }
@@ -336,9 +290,11 @@ namespace SpreadsheetUtilities
                 {
                     try
                     {
-                        if (OperatorStack.Count() != 0 && (OperatorStack != null && OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
+                        if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
+                            OperatorStack.Peek() == "/"))
                         {
-                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token), OperatorStack.Pop()));
+                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token),
+                                            OperatorStack.Pop()));
                         }
                         else
                         {
@@ -357,7 +313,8 @@ namespace SpreadsheetUtilities
                 ///pushed onto the operator stack.
                 else if (token == "+" || token == "-")
                 {
-                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
+                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" ||
+                        OperatorStack.Peek() == "-"))
                     {
                         double value2 = ValueStack.Pop();
                         double value1 = ValueStack.Pop();
@@ -370,7 +327,8 @@ namespace SpreadsheetUtilities
                 ///value stack depending on the operator at the top of the operator stack.
                 else if (token == ")")
                 {
-                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-"))
+                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "+" ||
+                        OperatorStack.Peek() == "-"))
                     {
                         double value2 = ValueStack.Pop();
                         double value1 = ValueStack.Pop();
@@ -379,7 +337,8 @@ namespace SpreadsheetUtilities
 
                     OperatorStack.Pop();
 
-                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/"))
+                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
+                        OperatorStack.Peek() == "/"))
                     {
                         double value2 = ValueStack.Pop();
                         double value1 = ValueStack.Pop();
@@ -390,8 +349,8 @@ namespace SpreadsheetUtilities
 
             double result = 0;
 
-            ///If there is a remaining expression that didn't get resolved while the for loop
-            ///was running, this is where this expression gets handled.
+            ///If there is a remaining expression that didn't get resolved while the
+            ///for loop was running, this is where this expression gets handled.
             if (ValueStack.Count() > 1)
             {
                 double value2 = ValueStack.Pop();
@@ -413,10 +372,11 @@ namespace SpreadsheetUtilities
             return result;
         }
         /// <summary>
-        /// Returns all of the the variables in a given formula. If the formula entered is
-        /// "x5 + y6 + X5" and a normalizer is given that capitalizes the character in a
-        /// given variable, then this method should return the list {X5, Y6}. If there is
-        /// no normalizer, then the list should be {x5, y6, X5}.
+        /// Returns all of the the variables in a given formula. If the formula
+        /// entered is "x5 + y6 + X5" and a normalizer is given that capitalizes
+        /// the character in a given variable, then this method should return the
+        /// list {X5, Y6}. If there is no normalizer, then the list should be
+        /// {x5, y6, X5}.
         /// </summary>
         /// <returns>All variables in the formula</returns>
         public IEnumerable<String> GetVariables()
@@ -424,27 +384,26 @@ namespace SpreadsheetUtilities
             return variables;
         }
         /// <summary>
-        /// 
+        /// Returns the string representation of the Formula object that was built
+        /// in the constructor, with all of the tokens parsed and normalized (if a
+        /// normalization delegate is given).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The Formula object in string form</returns>
         public override string ToString()
         {
             return formula;
         }
         /// <summary>
-        /// 
+        /// This method compares two Formula objects and determines if they are
+        /// equal based on the equality of their string forms.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">The object that this Formula object is comapred to.</param>
+        /// <returns>True if the objects' strings are equal, false otherwise.</returns>
         public override bool Equals(object? obj)
         {
             String string1 = this.ToString();
             String string2 = obj.ToString();
-            if (string1.Equals(string2))
-            {
-                return true;
-            }
-            return false;
+            return string1.Equals(string2);
         }
         /// <summary>
         /// This method creates a "==" operator for the Formula class by comparing
@@ -455,11 +414,7 @@ namespace SpreadsheetUtilities
         /// <returns>True if the two objects are equal, false otherwise.</returns>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            if (f1.Equals(f2))
-            {
-                return true;
-            }
-            return false;
+            return f1.Equals(f2);
         }
         /// <summary>
         /// This method creates a "!=" operator that serevs as an opposite of the
@@ -470,11 +425,7 @@ namespace SpreadsheetUtilities
         /// <returns>True if the two objects are unequal, false otherwise.</returns>
         public static bool operator !=(Formula f1, Formula f2)
         {
-            if (f1.Equals(f2))
-            {
-                return false;
-            }
-            return true;
+            return !f1.Equals(f2);
         }
         /// <summary>
         /// Returns a hash code for the class based on the hash code of the string
