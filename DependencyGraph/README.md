@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-﻿# DependencyGraph
-=======
 Author: Sasha Rybalkina 
 Partner: None 
 Start Date: 7-Jan-2023 
@@ -11,7 +8,6 @@ Commit Date: 27-1-2023 3:00
 Solution: Spreadsheet 
 Copyright: CS 3500 and Sasha Rybalkina - This work may not be copied for use in Academic Coursework.
 # DependencyGraph
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89
 This project creates a representation of a dependency graph by using two
 dictionaries, one for the dependents of a string, and one for the dependees.
 For every pair that gets added, the first item in the pair is treated as a
@@ -24,8 +20,4 @@ dependency that exists in the graph.
 I estimate that this project will take me 10 hours.
 # Time Spent
 I have spent a total of around 8 hours working on this project. Half of this
-<<<<<<< HEAD
 time was spent debugging.
-=======
-time was spent debugging.
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89
