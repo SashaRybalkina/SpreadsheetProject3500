@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+///<summary>
+///These are tests for Formula.cs
+///Written by Sasha Rybalkina, Febuary 2023.
+///<summary>
+using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
 
