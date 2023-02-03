@@ -144,12 +144,6 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
-                    else if (i < lastIndex && (formulaArray[i + 1] == "+" || formulaArray[i + 1] == "-" ||
-                                               formulaArray[i + 1] == "*" || formulaArray[i + 1] == "/"))
-                    {
-                        throw new FormulaFormatException("Cannot have a opperator right outisde of parentheses.");
-                    }
-
                     this.formula = this.formula + formulaArray[i];
                     tokens.Add(formulaArray[i]);
                 }
@@ -241,6 +235,10 @@ namespace SpreadsheetUtilities
             }
             else
             {
+                if (value1 / value2 == double.PositiveInfinity || value1 / value2 == double.NegativeInfinity)
+                {
+                    throw new DivideByZeroException();
+                }
                 return value1 / value2;
             }
         }
@@ -259,7 +257,7 @@ namespace SpreadsheetUtilities
             Stack<string> OperatorStack = new System.Collections.Generic.Stack<string>();
             if (lookup == null)
             {
-                return new FormulaError();
+                return new FormulaError("Parameter 'lookup' cannot be null");
             }
             foreach (string token in tokens)
             {
@@ -273,38 +271,58 @@ namespace SpreadsheetUtilities
                 ///then checks how the integer should be treated based on the operators being used.
                 else if (Double.TryParse(token, result: out double Result))
                 {
+
                     if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
                         OperatorStack.Peek() == "/"))
                     {
-                        ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), Result, OperatorStack.Pop()));
+                        try
+                        {
+                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), Result,
+                                OperatorStack.Pop()));
+                        }
+                        catch
+                        {
+                            return new FormulaError("Division by zero occurred");
+                        }
                     }
                     else
                     {
                         ValueStack.Push(Result);
                     }
+                    
                 }
 
                 ///Repeats the process of the previous if statement, except with variables. A
                 ///delegate is used to look up the value of a variable so that it can be evaluated.
                 else if (Regex.IsMatch(token, "[a-z|A-Z][0-9]"))
                 {
+                    double LookedUp = 0;
                     try
                     {
-                        if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
-                            OperatorStack.Peek() == "/"))
-                        {
-                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), (int)lookup(token),
-                                            OperatorStack.Pop()));
-                        }
-                        else
-                        {
-                            ValueStack.Push((int)lookup(token));
-                        }
+                        LookedUp = (double)lookup(token);
                     }
                     catch
                     {
-                        return new FormulaError();
+                        return new FormulaError("Unable to look up variable");
                     }
+                    if (OperatorStack.Count() != 0 && (OperatorStack.Peek() == "*" ||
+                        OperatorStack.Peek() == "/"))
+                    {
+                        try
+                        {
+                            ValueStack.Push(MultiplyOrDivide(ValueStack.Pop(), LookedUp,
+                                                             OperatorStack.Pop()));
+                        }
+                        catch
+                        {
+                            return new FormulaError("Division by zero occurred");
+                        }
+                    }
+                    else
+                    {
+                        ValueStack.Push(LookedUp);
+                    }
+
                 }
 
                 ///This if statement works with the "+" and "-" operators. If there is already
@@ -342,8 +360,16 @@ namespace SpreadsheetUtilities
                     {
                         double value2 = ValueStack.Pop();
                         double value1 = ValueStack.Pop();
-                        ValueStack.Push(MultiplyOrDivide(value1, value2, OperatorStack.Pop()));
+                        try
+                        {
+                            ValueStack.Push(MultiplyOrDivide(value1, value2, OperatorStack.Pop()));
+                        }
+                        catch
+                        {
+                            return new FormulaError("Division by zero occurred");
+                        }
                     }
+
                 }
             }
 
@@ -355,10 +381,19 @@ namespace SpreadsheetUtilities
             {
                 double value2 = ValueStack.Pop();
                 double value1 = ValueStack.Pop();
+
                 if (OperatorStack.Peek() == "*" || OperatorStack.Peek() == "/")
                 {
-                    result = MultiplyOrDivide(value1, value2, OperatorStack.Pop());
+                    try
+                    {
+                        result = MultiplyOrDivide(value1, value2, OperatorStack.Pop());
+                    }
+                    catch
+                    {
+                        return new FormulaError("Division by zero occurred");
+                    }
                 }
+
                 if (OperatorStack.Peek() == "+" || OperatorStack.Peek() == "-")
                 {
                     result = AddOrSubtract(value1, value2, OperatorStack.Pop());
@@ -368,7 +403,6 @@ namespace SpreadsheetUtilities
             {
                 result = ValueStack.Pop();
             }
-
             return result;
         }
         /// <summary>

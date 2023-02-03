@@ -14,8 +14,8 @@ public class UnitTest1
     [TestMethod]
     public void TestEquals()
     {
-        Formula formula = new Formula("1+6-7*2-(6/3+(8-4))");
-        Formula formula2 = new Formula("1+6-7.00*2-(6/3+(8.00-4))");
+        Formula formula = new Formula("1+6-7*2-(6/3+(8-4))-1");
+        Formula formula2 = new Formula("1+6-7.00*2-(6/3+(8.00-4))-1");
         Formula formula3 = new Formula("1+6");
         Assert.IsTrue(formula.Equals(formula2));
         Assert.IsFalse(formula.Equals(formula3));
@@ -34,7 +34,21 @@ public class UnitTest1
         Assert.IsFalse(formula.Equals(formula3));
     }
     /// <summary>
-    /// This tests the exceptions that should be thrown if a null or empty formula
+    /// This tests the FormulaErrors that should get returned if a division by
+    /// zero occurs, if an empty lookup is given, or if a variable cannot be
+    /// looked up.
+    /// </summary>
+    [TestMethod]
+    public void TestFormulaErrors()
+    {
+        Formula formula = new Formula("x5");
+        Formula formula2 = new Formula("1/(x6-x6)");
+        Assert.AreEqual(formula.Evaluate(null), new FormulaError("Parameter 'lookup' cannot be null"));
+        Assert.AreEqual(formula.Evaluate(s => throw new ArgumentException()), new FormulaError("Unable to look up variable"));
+        Assert.AreEqual(formula2.Evaluate(lookup), new FormulaError("Division by zero occurred"));
+    }
+    /// <summary>
+    /// This tests the exception that should be thrown if an empty formula
     /// is given.
     /// </summary>
     [TestMethod]
@@ -43,11 +57,25 @@ public class UnitTest1
     {
         Formula formula = new Formula("");
     }
+    /// <summary>
+    /// This tests the exception that should be thrown if a null formula is
+    /// given.
+    /// </summary>
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
     public void TestNullFormulaException()
     {
         Formula formula = new Formula(null);
+    }
+    /// <summary>
+    /// This tests the exception that should be thrown if a normalization is
+    /// invalid.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestInvalidNormalizationException()
+    {
+        Formula formula = new Formula("x6", normalize, s => false);
     }
     /// <summary>
     /// This tests the exceptions that should be thrown when using operators.
@@ -188,8 +216,8 @@ public class UnitTest1
     [TestMethod]
     public void TestEvaluate()
     {
-        Formula formula = new Formula("1+6-7*2-(6/3+(8-4))"); 
-        Assert.AreEqual((double)-13, formula.Evaluate(s => 5));
+        Formula formula = new Formula("x1+6-7*2-(6/3+(8-4))+1"); 
+        Assert.AreEqual((double)-12, formula.Evaluate(s => 1));
     }
     /// <summary>
     /// this tests the Evaluate method. The formula given should evaluate to -5.
@@ -197,8 +225,8 @@ public class UnitTest1
     [TestMethod]
     public void TestEvaluateWithNormalize()
     {
-        Formula formula = new Formula("1+x6-7*X6", normalize, IsValid);
-        Assert.AreEqual((double)-17, formula.Evaluate(lookup));
+        Formula formula = new Formula("1*x6*7*X6", normalize, IsValid);
+        Assert.AreEqual((double)63, formula.Evaluate(lookup));
     }
     /// <summary>
     /// This tests the GetVariables method. The formula given has the variables
