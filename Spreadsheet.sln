@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 25.0.1704.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaEvaluator", "FormulaEvaluator\FormulaEvaluator.csproj", "{C9DD7A24-5D01-4595-B84C-A575B7E21D95}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaEvaluatorTester", "FormulaEvaluatorTester\FormulaEvaluatorTester.csproj", "{D13340D7-3057-4DAE-9DC8-0022C4B7DF4B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2E90EEB9-85FB-468D-9E0B-9099152793AF}"
 	ProjectSection(SolutionItems) = preProject
 		README = README
@@ -26,14 +22,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C9DD7A24-5D01-4595-B84C-A575B7E21D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9DD7A24-5D01-4595-B84C-A575B7E21D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9DD7A24-5D01-4595-B84C-A575B7E21D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9DD7A24-5D01-4595-B84C-A575B7E21D95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D13340D7-3057-4DAE-9DC8-0022C4B7DF4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D13340D7-3057-4DAE-9DC8-0022C4B7DF4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D13340D7-3057-4DAE-9DC8-0022C4B7DF4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D13340D7-3057-4DAE-9DC8-0022C4B7DF4B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{89F22B28-7F9D-4B3A-BEE3-AE27026B5BF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{89F22B28-7F9D-4B3A-BEE3-AE27026B5BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89F22B28-7F9D-4B3A-BEE3-AE27026B5BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU

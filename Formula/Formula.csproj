@@ -6,7 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FormulaEvaluator\FormulaEvaluator.csproj" />
-  </ItemGroup>
 </Project>
