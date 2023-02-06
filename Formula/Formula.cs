@@ -1,4 +1,5 @@
-Author:    Sasha Rybalkina
+/// <summary>
+/// Author:    Sasha Rybalkina
 /// Partner:   None
 /// Date:      Febuary 3, 2023
 /// Course:    CS 3500, University of Utah, School of Computing
@@ -19,6 +20,7 @@ Author:    Sasha Rybalkina
 /// A GetHashCode method, which gets the hash code of each class
 /// A GetTokens method, which turns the given formula into a list
 /// Methods for creating a FormulaError and a FormulaFormatException
+/// </summary>
 
 using System;
 using System.Collections;
