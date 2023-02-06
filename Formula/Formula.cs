@@ -1,16 +1,25 @@
-﻿// Skeleton written by Joe Zachary for CS 3500, September 2013
-// Version 1.1 (9/22/13 11:45 a.m.)
-// Change log:
-//  (Version 1.1) Repaired mistake in GetTokens
-//  (Version 1.1) Changed specification of second constructor to
-//                clarify description of how validation works
-// (Daniel Kopta) 
-// Version 1.2 (9/10/17) 
-// Change log:
-//  (Version 1.2) Changed the definition of equality with regards
-//                to numeric tokens
-// Final version written by Sasha Rybalkina, Febuary 2023
-// Version 2 (2/2/2023)
+Author:    Sasha Rybalkina
+/// Partner:   None
+/// Date:      Febuary 3, 2023
+/// Course:    CS 3500, University of Utah, School of Computing
+/// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
+///            be copied for use in Academic Coursework.
+///
+/// I, Sasha Rybalkina, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All 
+/// references used in the completion of the assignments are cited 
+/// in my README file.
+///
+/// File Contents
+/// Two Formula class constructors, one for using delegates and the other for not using delegates.
+/// The Evaluate method, which evaluates the formula given
+/// One ToString method, which converts the entire class into a string
+/// One Equals method, which evaluates the equality of two Formula classes
+/// Two operators, == and !=, which use the logic of the Equals method
+/// A GetHashCode method, which gets the hash code of each class
+/// A GetTokens method, which turns the given formula into a list
+/// Methods for creating a FormulaError and a FormulaFormatException
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
