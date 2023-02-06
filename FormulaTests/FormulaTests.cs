@@ -208,6 +208,13 @@ public class UnitTest1
     {
         Formula formula2 = new Formula("5 32");
     }
+    //Exception test for invalid variable
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void TestVarAndIntExceptions3()
+    {
+        Formula formula3 = new Formula("x.");
+    }
     //Exception tests for a variable next to an integer
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
