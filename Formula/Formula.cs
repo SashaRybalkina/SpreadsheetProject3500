@@ -294,7 +294,7 @@ namespace SpreadsheetUtilities
 
                 ///Repeats the process of the previous if statement, except with variables. A
                 ///delegate is used to look up the value of a variable so that it can be evaluated.
-                else if (Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z|_][0-9|_|a-z|A-Z]") || Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z|_]"))
+                else if (Regex.IsMatch(token, "[a-z|A-Z|_][0-9|_|a-z|A-Z]") || Regex.IsMatch(token, "[a-z|A-Z|_]"))
                 {
                     double LookedUp = 0;
                     try
