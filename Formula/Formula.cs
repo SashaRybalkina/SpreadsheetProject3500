@@ -128,7 +128,7 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have two consecutive numbers in expression.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i+1], "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
@@ -151,7 +151,7 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have an integer right outisde of parentheses.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i], "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
                     {
                         throw new FormulaFormatException("Cannot have a variable right outisde of parentheses.");
                     }
@@ -183,7 +183,7 @@ namespace SpreadsheetUtilities
                 ///or if the variable is outside of parentheses, throws an exception.
                 else
                 {
-                    if (!Regex.IsMatch(formulaArray[i], "[a-z|A-Z][0-9]"))
+                    if (!Regex.IsMatch(formulaArray[i], "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
                     {
                         throw new FormulaFormatException("The variable entered must have one integer and one character.");
                     }
@@ -195,7 +195,7 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have an integer right next to a variable.");
                     }
-                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i + 1], "[a-z|A-Z][0-9]"))
+                    else if (i < lastIndex && Regex.IsMatch(formulaArray[i+1], "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
                     {
                         throw new FormulaFormatException("Cannot have two consecutive variables in expression");
                     }
@@ -305,7 +305,7 @@ namespace SpreadsheetUtilities
 
                 ///Repeats the process of the previous if statement, except with variables. A
                 ///delegate is used to look up the value of a variable so that it can be evaluated.
-                else if (Regex.IsMatch(token, "[a-z|A-Z][0-9]"))
+                else if (Regex.IsMatch(token, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
                 {
                     double LookedUp = 0;
                     try
