@@ -1,7 +1,7 @@
 Author: Sasha Rybalkina 
 Partner: None 
 Start Date: 7-Jan-2023 
-Course: CS 3505, University of Utah, School of Computing 
+Course: CS 3500, University of Utah, School of Computing 
 GitHub ID: crazyrussian123456 
 Repo: uofu-cs3500-spring23/spreadsheet-crazyrussian123456 
 Commit Date: 2-2-2023 6:00 
