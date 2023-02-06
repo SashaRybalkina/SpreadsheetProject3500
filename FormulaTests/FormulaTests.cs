@@ -1,7 +1,20 @@
-///<summary>
-///These are tests for Formula.cs
-///Written by Sasha Rybalkina, Febuary 2023.
-///<summary>
+/// <summary>
+/// Author:    Sasha Rybalkina
+/// Partner:   None
+/// Date:      Febuary 3, 2023
+/// Course:    CS 3500, University of Utah, School of Computing
+/// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
+///            be copied for use in Academic Coursework.
+///
+/// I, Sasha Rybalkina, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All 
+/// references used in the completion of the assignments are cited 
+/// in my README file.
+///
+/// File Contents
+/// Tests for checking the functionality of every single method in Formula.cs
+/// Tests for checking the throwing of exceptions when appropriate.
+/// </summary>
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
