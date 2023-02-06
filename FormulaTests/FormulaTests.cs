@@ -18,6 +18,7 @@
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FormulaTests;
 
