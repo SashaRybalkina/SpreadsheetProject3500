@@ -9,15 +9,9 @@ namespace DevelopmentTests
     ///This is a test class for DependencyGraphTest and is intended
     ///to contain all DependencyGraphTest Unit Tests
     ///</summary>
-<<<<<<< HEAD:DependencyGraphTests/UnitTest1.cs
     [TestClass()]
     public class DependencyGraphTests
     {
-=======
-    [TestClass()]
-    public class DependencyGraphTests
-    {
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89:DependencyGraphTests/DependencyGraphTests.cs
         /// <summary>
         ///Empty graph should contain nothing
         ///</summary>

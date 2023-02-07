@@ -23,16 +23,10 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-<<<<<<< HEAD:DependencyGraph/Class1.cs
-        private int size = 0;
         private Dictionary<string, List<string>> Dependents;
-=======
         /// This is the tracker of the size of the graph
         private int size = 0;
         /// This creates a dictionary for the dependents of every string
-        private Dictionary<string, List<string>> Dependents;
-        /// This creates a dictionary for the dependees of every string
->>>>>>> 3084136dcad793d7b8e7569487822ed459d06b89:DependencyGraph/DependencyGraph.cs
         private Dictionary<string, List<string>> Dependees;
         /// <summary>
         /// Creates an empty DependencyGraph.
@@ -54,7 +48,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return Dependees[s].Count; }
+            get { if (!Dependees.ContainsKey(s)) { return 0; } return Dependees[s].Count; }
         }
         /// <summary>
         /// Reports whether dependents(s) is non-empty.
@@ -121,6 +115,7 @@ namespace SpreadsheetUtilities
                 if (!(Dependents[s].Contains(t)))
                 {
                     Dependents[s].Add(t);
+                    size++;
                 }
             }
             /// If s isn't already a key in the dictionary, then adds a new key, value pair to
@@ -128,8 +123,8 @@ namespace SpreadsheetUtilities
             else
             {   
                 Dependents.Add(s, new List<string>() { t });
+                size++;
             }
-            size++;
             /// This if statement deals with how the pair should be added to the "Dependees"
             /// dictionary. If t is a key in the dictionary, checks if (s, t) is already an
             /// ordered pair, and then adds the pair if it is not a duplicate.
@@ -172,6 +167,7 @@ namespace SpreadsheetUtilities
                     /// Only removes t from the value list of s.
                     Dependents[s].Remove(t);
                 }
+                size--;
                 /// This if statement deals with how the pair gets removed from the
                 /// Dependees dictionary.
                 if (Dependees[t].Count == 1 && Dependees[t].Contains(s))
@@ -184,7 +180,6 @@ namespace SpreadsheetUtilities
                     /// Only removes s from the value list of t.
                     Dependees[t].Remove(s);
                 }
-                size--;
             }
         }
         /// <summary>
