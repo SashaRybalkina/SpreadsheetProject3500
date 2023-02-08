@@ -285,21 +285,21 @@ namespace SS
         /// names has changed.
         ///     The names are enumerated in the order in which the calculations 
         /// should be done.
-///   </para>
-///   
-///   <para>For example, suppose that:</para>
-///   
-///   <list type="bullet">
-///      <item>A1 contains 5</item>
-///      <item>B1 contains 7</item>
-///      <item>C1 contains the formula A1 + B1</item>
-///      <item>D1 contains the formula A1 * C1</item>
-///      <item>E1 contains 15</item>
-///   </list>
-/// 
-///   <para>
-///     If A1 and B1 have changed, then A1, B1, and C1, and D1 must be 
-///     recalculated,
+        ///   </para>
+        ///   
+        ///   <para>For example, suppose that:</para>
+        ///   
+        ///   <list type="bullet">
+        ///      <item>A1 contains 5</item>
+        ///      <item>B1 contains 7</item>
+        ///      <item>C1 contains the formula A1 + B1</item>
+        ///      <item>D1 contains the formula A1 * C1</item>
+        ///      <item>E1 contains 15</item>
+        ///   </list>
+        /// 
+        ///   <para>
+        ///     If A1 and B1 have changed, then A1, B1, and C1, and D1 must be 
+        ///     recalculated,
         ///     and they must be recalculated in either the order A1,B1,C1,D1 or 
         /// B1,A1,C1,D1.
         ///     This method will produce one of those enumerations.

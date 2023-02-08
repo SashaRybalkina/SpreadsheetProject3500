@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using System.Xml.Linq;
+using Microsoft.VisualBasic;
 using SpreadsheetUtilities;
 namespace SS
 {
@@ -36,6 +37,32 @@ namespace SS
     {
         private DependencyGraph dependencies = new();
         private Dictionary<string, object> cells = new();
+
+        /// <summary>
+        /// Private helper method for the three SetCellContents
+        /// methods.
+        /// </summary>
+        /// <param name="name">Name of cell</param>
+        /// <param name="contents">The contents of the cell</param>
+        /// <returns>A list of all cells that directly or indirectly depend on
+        /// the given cell.</returns>
+        /// <exception cref="InvalidNameException"></exception>
+        private ISet<string> SetCell(string name, object contents)
+        {
+            if (name == null)
+            {
+                throw new InvalidNameException();
+            }
+            if (cells.ContainsKey(name))
+            {
+                cells[name] = contents;
+            }
+            else
+            {
+                cells.Add(name, contents);
+            }
+            return GetCellsToRecalculate(name).ToHashSet();
+        }
 
         /// <summary>
         /// Gets the contents or value of the given cell.
@@ -72,19 +99,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, double number)
         {
-            if (name == null)
-            {
-                throw new InvalidNameException();
-            }
-            if (cells.ContainsKey(name))
-            {
-                cells[name] = number;
-            }
-            else
-            {
-                cells.Add(name, number);
-            }
-            return GetCellsToRecalculate(name).ToHashSet();
+            return SetCell(name, number);
         }
         /// <summary>
         /// This method either adds a new cell to the cell dictionary created
@@ -99,19 +114,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, string text)
         {
-            if (name == null)
-            {
-                throw new InvalidNameException();
-            }
-            if (cells.ContainsKey(name))
-            {
-                cells[name] = text;
-            }
-            else
-            {
-                cells.Add(name, text);
-            }
-            return GetCellsToRecalculate(name).ToHashSet();
+            return SetCell(name, text);
         }
         /// <summary>
         /// This method either adds a new cell to the cell dictionary created
@@ -126,19 +129,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            if (name == null)
-            {
-                throw new InvalidNameException();
-            }
-            else if (cells.ContainsKey(name))
-            {
-                cells[name] = formula;
-            }
-            else
-            {
-                cells.Add(name, formula);
-            }
-
+            ISet<string> returnList = SetCell(name, formula);
             List<string> ToSave = dependencies.GetDependents(name).ToList<string>();
             dependencies.ReplaceDependents(name, formula.GetVariables());
 
@@ -152,7 +143,7 @@ namespace SS
                 throw;
             }
 
-            return GetCellsToRecalculate(name).ToHashSet();
+            return returnList;
         }
         /// <summary>
         /// Gets all of the direct dependents of the given cell.
