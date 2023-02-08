@@ -1,0 +1,175 @@
+﻿/// <summary>
+/// Author:    Sasha Rybalkina
+/// Partner:   None
+/// Date:      Febuary 9, 2023
+/// Course:    CS 3500, University of Utah, School of Computing
+/// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
+///            be copied for use in Academic Coursework.
+///
+/// I, Sasha Rybalkina, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All 
+/// references used in the completion of the assignments are cited 
+/// in my README file.
+///
+/// File Contents
+/// Tests for the SetCellContents methods
+/// Tests for GetCellContents
+/// Tests for GetNamesOfAllEmptyCells
+/// Tests for GetDirectDependents
+/// Tests for throwing exceptions when they should be thrown
+/// </summary>
+using SpreadsheetUtilities;
+using SS;
+
+namespace SpreadsheetTests;
+
+[TestClass]
+public class methods
+{
+    Spreadsheet s = new();
+
+    /// <summary>
+    /// Tests the SetCellContents method that passes in a double.
+    /// Cell A1 should contain 4, cell A2 should contain 5, and cell
+    /// A3 should contain 7.
+    /// </summary>
+    [TestMethod]
+    public void TestSetCellContentsWithDouble()
+    {
+        s.SetCellContents("A1", 4);
+        s.SetCellContents("A2", 5);
+        s.SetCellContents("A3", 6);
+        s.SetCellContents("A3", 7);
+
+        Assert.AreEqual((double)4, s.GetCellContents("A1"));
+        Assert.AreEqual((double)5, s.GetCellContents("A2"));
+        Assert.AreEqual((double)7, s.GetCellContents("A3"));
+    }
+    /// <summary>
+    /// Tests the SetCellContents method that passes in a string.
+    /// Cell A1 should contain "4+2+7", cell A2 should contain
+    /// "7-5-2", and cell A3 should contain "0*0*0".
+    /// </summary>
+    [TestMethod]
+    public void TestSetCellContentsWithString()
+    {
+        s.SetCellContents("A1", "4+2+7");
+        s.SetCellContents("A2", "7-5-2");
+        s.SetCellContents("A3", "1*1*1");
+        s.SetCellContents("A3", "0*0*0");
+
+        Assert.AreEqual("4+2+7", s.GetCellContents("A1"));
+        Assert.AreEqual("7-5-2", s.GetCellContents("A2"));
+        Assert.AreEqual("0*0*0", s.GetCellContents("A3"));
+    }
+    /// <summary>
+    /// Tests the SetCellContents method that passes in a string.
+    /// Cell A1 should contain a Formula object with the expression
+    /// "4+2+7", cell A2 should contain a Formula object with the
+    /// expression "7-5-2", and cell A3 should contain a Formula object
+    /// with the expression "0*0*0".
+    /// </summary>
+    [TestMethod]
+    public void TestSetCellContentsWithFormula()
+    {
+        s.SetCellContents("A1", new Formula("4+2+7"));
+        s.SetCellContents("A2", new Formula("7-5-2"));
+        s.SetCellContents("A3", new Formula("1*1*1"));
+        s.SetCellContents("A3", new Formula("0*0*0"));
+
+        Assert.AreEqual(new Formula("4+2+7"), s.GetCellContents("A1"));
+        Assert.AreEqual(new Formula("7-5-2"), s.GetCellContents("A2"));
+        Assert.AreEqual(new Formula("0*0*0"), s.GetCellContents("A3"));
+    }
+    /// <summary>
+    /// Tests the GetCellContents method. Invoking this method on cell
+    /// A1 should return the string "eeeeeeeeee"
+    /// </summary>
+    [TestMethod]
+    public void TestGetCellContents()
+    {
+        s.SetCellContents("A1", "eeeeeeeeee");
+        Assert.AreEqual("eeeeeeeeee", s.GetCellContents("A1"));
+    }
+    /// <summary>
+    /// Tests the GetNamesOfAllEmptyCells method. The list returned
+    /// should contain A1, A2, and A3.
+    /// </summary>
+    [TestMethod]
+    public void TestGetNamesOfAllEmptyCells()
+    {
+        s.SetCellContents("A1", new Formula("4+2+7"));
+        s.SetCellContents("A2", new Formula("7-5-2"));
+        s.SetCellContents("A3", new Formula("0*0*0"));
+
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
+    }
+    /// <summary>
+    /// Tests the GetDirectDependents method. A2 should depend on A1,
+    /// A3 should depend on A2, and A4 should depend on A1, A2, and A3.
+    /// </summary>
+    [TestMethod]
+    public void TestGetDirectDependents()
+    {
+        s.SetCellContents("A1", new Formula("69"));
+        s.SetCellContents("A2", new Formula("A1/3"));
+        s.SetCellContents("A3", new Formula("A2*2"));
+        s.SetCellContents("A4", new Formula("A2*A3*A1"));
+
+        Assert.IsTrue(s.GetDirectDependents("A1").Contains("A2"));
+        Assert.IsTrue(s.GetDirectDependents("A1").Contains("A4"));
+
+        Assert.IsTrue(s.GetDirectDependents("A2").Contains("A3"));
+        Assert.IsTrue(s.GetDirectDependents("A2").Contains("A4"));
+
+        Assert.IsTrue(s.GetDirectDependents("A3").Contains("A4"));
+    }
+}
+/// <summary>
+/// This test class tests all excpetions that should come from the methods
+/// of the Sreadsheet class.
+/// </summary>
+[TestClass]
+public class Exceptions
+{
+    Spreadsheet s = new();
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestSetCellContentsWithDouble()
+    {
+        s.SetCellContents(null, 4);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestSetCellContentsWithString()
+    {
+        s.SetCellContents(null, "4+2+7");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestSetCellContentsWithFormula()
+    {
+        s.SetCellContents(null, new Formula("4+2+7"));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestGetCellContents()
+    {
+        s.SetCellContents("A1", "eeeeeeeeee");
+        s.GetCellContents("A4");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestGetCellContentsWithNull()
+    {
+        s.SetCellContents("A1", "eeeeeeeeee");
+        s.GetCellContents(null);
+    }
+}

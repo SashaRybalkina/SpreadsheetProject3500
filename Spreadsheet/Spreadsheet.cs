@@ -1,4 +1,30 @@
-﻿using System;
+﻿/// <summary>
+/// Author:    Sasha Rybalkina
+/// Partner:   None
+/// Date:      Febuary 9, 2023
+/// Course:    CS 3500, University of Utah, School of Computing
+/// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
+///            be copied for use in Academic Coursework.
+///
+/// I, Sasha Rybalkina, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All 
+/// references used in the completion of the assignments are cited 
+/// in my README file.
+///
+/// File Contents
+/// The method GetCellContents, which returns the contents of a specified cell
+/// The method GetNamesOfAllNonemptyCells, which returns a list of all nonempty
+/// cells.
+/// Three variations of the SetCellContents method, with one of the variations
+/// handling a double as one of the parameters, one of the variations handling
+/// a Formula class, and the last variation handling a string parameter. All
+/// three of these variations add new cells or new contents to existing cells,
+/// but the variation that takes in a Formula class also checks for circulation
+/// and resolves said circulation if found.
+/// The GetDirectDependents method, which returns all of the direct dependents
+/// of a specified cell.
+/// </summary>
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
@@ -26,10 +52,9 @@ namespace SS
             return cells[name];
         }
         /// <summary>
-        /// This method gets all of the cells in the spreadsheet that are non-
-        /// empty.
+        /// This method gets all of the cells in the spreadsheet that are nonempty.
         /// </summary>
-        /// <returns>A list of the names of the non-empty cells</returns>
+        /// <returns>A list of the names of the nonempty cells</returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             return cells.Keys;
@@ -47,7 +72,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, double number)
         {
-            if (name == null || !cells.ContainsKey(name))
+            if (name == null)
             {
                 throw new InvalidNameException();
             }
@@ -74,7 +99,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, string text)
         {
-            if (name == null || !cells.ContainsKey(name))
+            if (name == null)
             {
                 throw new InvalidNameException();
             }
@@ -101,7 +126,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            if (name == null || !cells.ContainsKey(name))
+            if (name == null)
             {
                 throw new InvalidNameException();
             }
