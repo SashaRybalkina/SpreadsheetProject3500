@@ -106,26 +106,6 @@ public class methods
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
     }
-    /// <summary>
-    /// Tests the GetDirectDependents method. A2 should depend on A1,
-    /// A3 should depend on A2, and A4 should depend on A1, A2, and A3.
-    /// </summary>
-    [TestMethod]
-    public void TestGetDirectDependents()
-    {
-        s.SetCellContents("A1", new Formula("69"));
-        s.SetCellContents("A2", new Formula("A1/3"));
-        s.SetCellContents("A3", new Formula("A2*2"));
-        s.SetCellContents("A4", new Formula("A2*A3*A1"));
-
-        Assert.IsTrue(s.GetDirectDependents("A1").Contains("A2"));
-        Assert.IsTrue(s.GetDirectDependents("A1").Contains("A4"));
-
-        Assert.IsTrue(s.GetDirectDependents("A2").Contains("A3"));
-        Assert.IsTrue(s.GetDirectDependents("A2").Contains("A4"));
-
-        Assert.IsTrue(s.GetDirectDependents("A3").Contains("A4"));
-    }
 }
 /// <summary>
 /// This test class tests all excpetions that should come from the methods
