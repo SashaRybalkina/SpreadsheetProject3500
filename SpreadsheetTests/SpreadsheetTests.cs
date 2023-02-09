@@ -108,49 +108,49 @@ public class methods
     }
 }
 /// <summary>
-/// This test class tests all excpetions that should come from the methods
+/// This test class tests all exceptions that should come from the methods
 /// of the Sreadsheet class.
 /// </summary>
 [TestClass]
 public class Exceptions
 {
     Spreadsheet s = new();
-
+    //Tests for an invalid name exception in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithDoubleException()
     {
         s.SetCellContents(".X", 4);
     }
-
+    //Tests for an invalid name exception in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithStringException()
     {
         s.SetCellContents("X,", "4+2+7");
     }
-
+    //Tests for ArgumentNullException in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(ArgumentNullException))]
     public void TestSetCellContentsWithStringException2()
     {
         s.SetCellContents("X3", (string)null);
     }
-
+    //Tests for an invalid name exception in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithFormulaException()
     {
         s.SetCellContents("54", new Formula("4+2+7"));
     }
-
+    //Tests for ArgumentNullException in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(ArgumentNullException))]
     public void TestSetCellContentsWithFormulaException2()
     {
         s.SetCellContents("X3", (Formula)null);
     }
-
+    //Tests for CircularException in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(CircularException))]
     public void TestSetCellContentsCircularException()
@@ -159,7 +159,7 @@ public class Exceptions
         s.SetCellContents("X2", new Formula("X1 + 10"));
         s.SetCellContents("X3", new Formula("X2 + 10"));
     }
-
+    //Tests for an invalid name exception GetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
     public void TestGetCellContentsException()
@@ -167,7 +167,7 @@ public class Exceptions
         s.SetCellContents("A1", "eeeeeeeeee");
         s.GetCellContents("A4");
     }
-
+    //Tests for an invalid name exception in GetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
     public void TestGetCellContentsException2()
