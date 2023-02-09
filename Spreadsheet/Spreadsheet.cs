@@ -49,9 +49,13 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private ISet<string> SetCell(string name, object contents)
         {
-            if (name == null)
+            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
             {
                 throw new InvalidNameException();
+            }
+            if (contents == null)
+            {
+                throw new ArgumentNullException();
             }
             if (cells.ContainsKey(name))
             {
@@ -72,7 +76,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override object GetCellContents(string name)
         {
-            if (name == null || !cells.ContainsKey(name))
+            if (name == null || !cells.ContainsKey(name) || !Regex.IsMatch(name, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
             {
                 throw new InvalidNameException();
             }

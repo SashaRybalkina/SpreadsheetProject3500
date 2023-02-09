@@ -118,28 +118,51 @@ public class Exceptions
 
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void TestSetCellContentsWithDouble()
+    public void TestSetCellContentsWithDoubleException()
     {
-        s.SetCellContents(null, 4);
+        s.SetCellContents(".X", 4);
     }
 
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void TestSetCellContentsWithString()
+    public void TestSetCellContentsWithStringException()
     {
-        s.SetCellContents(null, "4+2+7");
+        s.SetCellContents("X,", "4+2+7");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void TestSetCellContentsWithStringException2()
+    {
+        s.SetCellContents("X3", (string)null);
     }
 
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void TestSetCellContentsWithFormula()
+    public void TestSetCellContentsWithFormulaException()
     {
-        s.SetCellContents(null, new Formula("4+2+7"));
+        s.SetCellContents("54", new Formula("4+2+7"));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void TestSetCellContentsWithFormulaException2()
+    {
+        s.SetCellContents("X3", (Formula)null);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void TestSetCellContentsCircularException()
+    {
+        s.SetCellContents("X1", new Formula("X3"));
+        s.SetCellContents("X2", new Formula("X1 + 10"));
+        s.SetCellContents("X3", new Formula("X2 + 10"));
     }
 
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void TestGetCellContents()
+    public void TestGetCellContentsException()
     {
         s.SetCellContents("A1", "eeeeeeeeee");
         s.GetCellContents("A4");
@@ -147,9 +170,9 @@ public class Exceptions
 
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void TestGetCellContentsWithNull()
+    public void TestGetCellContentsException2()
     {
         s.SetCellContents("A1", "eeeeeeeeee");
-        s.GetCellContents(null);
+        s.GetCellContents("6");
     }
 }
