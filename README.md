@@ -10,17 +10,27 @@ Copyright: CS 3500 and Sasha Rybalkina - This work may not be copied for use in 
 # Spreadsheet
 This is a project designated to recreating a spreadsheet through the use of
 software practice.
-# Time Estimation
-For FormulaEvaluator, I estimate needing 7 hours. A lot of this time will go
-into learning how to use VisualStudio and GitHub. For DependencyGraph, I
-estimate needing 10 hours. For the refactoring of the FormulaEvaluator method,
-Formula, I estimate needing 10 hours for implementing the code and making sure
-that it runs as it should. In total, 27 hours will be needed.
-# Time Spent
-It took me a total of 12 hours to finish FormulaEvaluator. Most of this time
-was spent debugging. To finish DependencyGraph, I needed 8 hours. In order to
-refactor FormulaEvaluator into Formula, I needed less time than I estimated,
-which was 7 hours. In total, I have spent 27 implemeting the spreadsheet.
+# Hours Estimated/Worked
+7 / 12  - Assigment 1
+10 / 8  - Assignment 2
+10 / 7  - Assigment 3
+5 / 4  - Assignment 4
+# Examples of Good Software Practice
+One of the exampels of me using GSP is through creating helper methods. For example,
+when implementing the Formula class, I used two helper methods in the Evaluate method,
+one for handling adding and subtracting, and one for handling multiplying and dividing,
+which limited code repitition.
+
+Another example of me using GSP is through using commenting and documentation where it
+is appropriate. In the FormulaEvaluator class, I commented every single if statement
+to create more clarity for the functioning of that if satement. In the DependencyGraph
+and Formula classes, I documented every single method that the classes had, and clearly
+defined the behavior of the methods, their parameters, and what they were supposed to
+return.
+
+The third example of me using GPS is through using proper versioning. For assignment 4,
+I have been commiting regularly and giving meaningful comments to all of my commits.
+Also, I have been adding tags to all of my commits.
 # IMPORTANT INFO REGARDING VERSIONING
 Due to issues with connecting my GitHub repository with VisualStudio, I had to delete
 my old repository and create a brand new one, so a lot of my versioning history is
