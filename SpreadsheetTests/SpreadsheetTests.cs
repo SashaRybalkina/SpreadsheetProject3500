@@ -20,6 +20,7 @@
 /// </summary>
 using SpreadsheetUtilities;
 using SS;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SpreadsheetTests;
 
