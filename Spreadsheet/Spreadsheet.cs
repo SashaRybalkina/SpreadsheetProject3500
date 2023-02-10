@@ -53,15 +53,15 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
-            if (contents == null)
+            else if (contents == null)
             {
                 throw new ArgumentNullException();
             }
-            if (cells.ContainsKey(name))
+            else if (cells.ContainsKey(name))
             {
                 cells[name] = contents;
             }
-            else
+            else if (contents + "" != "")
             {
                 cells.Add(name, contents);
             }

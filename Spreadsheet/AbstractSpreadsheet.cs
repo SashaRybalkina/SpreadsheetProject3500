@@ -337,10 +337,21 @@ namespace SS
             return GetCellsToRecalculate(new HashSet<String>() { name });
         }
         /// <summary>
-        /// A helper for the GetCellsToRecalculate method.
-        /// 
-        ///   -- You should fully comment what is going on below using XML tags as appropriate --
+        /// This method recursively checks for circularity in the dependencies
+        /// of the cells. If the currectly visited cells contain the current
+        /// cell being looked at, throws a new CircularException. Else, if the
+        /// direct dependent of the cell hasn't been visited, recursively checks
+        /// that dependent for circularity and marks it as visited, while also
+        /// checking every direct dependent of that dependent. After the cell
+        /// and all of its direct and indirect dependents get checked, the
+        /// original cell is marked as changed.
         /// </summary>
+        /// <param name="start">The initial cell enetered</param>
+        /// <param name="name">The current cell being checked, can be a dependent
+        /// of the initial cell</param>
+        /// <param name="visited">The list of all cells that have been visited</param>
+        /// <param name="changed">The list of all cell that have been changed</param>
+        /// <exception cref="CircularException"></exception>
         private void Visit(String start, String name, ISet<String> visited,
         LinkedList<String> changed)
         {

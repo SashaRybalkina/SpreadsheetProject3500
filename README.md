@@ -4,7 +4,7 @@ Start Date: 7-Jan-2023
 Course: CS 3500, University of Utah, School of Computing 
 GitHub ID: crazyrussian123456 
 Repo: uofu-cs3500-spring23/spreadsheet-crazyrussian123456 
-Commit Date: 2-2-2023 6:00 
+Commit Date: 2-9-2023 6:00 
 Solution: Spreadsheet 
 Copyright: CS 3500 and Sasha Rybalkina - This work may not be copied for use in Academic Coursework.
 # Spreadsheet
@@ -31,7 +31,3 @@ return.
 The third example of me using GPS is through using proper versioning. For assignment 4,
 I have been commiting regularly and giving meaningful comments to all of my commits.
 Also, I have been adding tags to all of my commits.
-# IMPORTANT INFO REGARDING VERSIONING
-Due to issues with connecting my GitHub repository with VisualStudio, I had to delete
-my old repository and create a brand new one, so a lot of my versioning history is
-lost.

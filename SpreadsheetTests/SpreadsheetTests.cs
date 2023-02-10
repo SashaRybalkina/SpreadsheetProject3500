@@ -57,10 +57,12 @@ public class methods
         s.SetCellContents("A2", "7-5-2");
         s.SetCellContents("A3", "1*1*1");
         s.SetCellContents("A3", "0*0*0");
+        s.SetCellContents("A4", "");
 
         Assert.AreEqual("4+2+7", s.GetCellContents("A1"));
         Assert.AreEqual("7-5-2", s.GetCellContents("A2"));
         Assert.AreEqual("0*0*0", s.GetCellContents("A3"));
+        Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("A4"));
     }
     /// <summary>
     /// Tests the SetCellContents method that passes in a string.
