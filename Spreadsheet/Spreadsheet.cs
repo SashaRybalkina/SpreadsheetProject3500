@@ -38,9 +38,19 @@ namespace SS
     {
         private DependencyGraph dependencies = new();
         private Dictionary<string, Cell> cells = new();
+        private string PathToFile;
+
+        public Spreadsheet()
+        {
+        }
 
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
+        }
+
+        public Spreadsheet(string pathToFile, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
+        {
+            PathToFile = pathToFile;
         }
 
         /// <summary>
@@ -54,21 +64,18 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private IList<string> SetCell(string name, object contents)
         {
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$"))
-            {
-                throw new InvalidNameException();
-            }
-            else if (contents == null)
+            if (contents == null)
             {
                 throw new ArgumentNullException();
             }
             else if (cells.ContainsKey(name))
             {
-                cells[name].SetContents(contents);
+                cells[Normalize(name)].SetContents(contents);
+                cells[Normalize(name)].SetValue(contents);
             }
             else if (contents + "" != "")
             {
-                cells.Add(name, new Cell(contents));
+                cells.Add(Normalize(name), new Cell(contents));
             }
             return GetCellsToRecalculate(name).ToList();
         }
@@ -83,7 +90,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override object GetCellContents(string name)
         {
-            if (name == null || !cells.ContainsKey(name) || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$"))
+            if (name == null || !cells.ContainsKey(name) || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$") || !IsValid(name))
             {
                 throw new InvalidNameException();
             }
@@ -97,7 +104,7 @@ namespace SS
         /// <returns>The value of the cell</returns>
         public override object GetCellValue(string name)
         {
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$"))
+            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$") || !IsValid(name))
             {
                 throw new InvalidNameException();
             }
@@ -129,28 +136,29 @@ namespace SS
             throw new NotImplementedException();
         }
 
+
+
+
+
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$"))
+            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$") || !IsValid(name))
             {
                 throw new InvalidNameException();
             }
-            if (Double.TryParse(content, result: out double Result))
+            else if (Double.TryParse(content, result: out double Result))
             {
-                cells[name].SetContents(Result);
-                cells[name].SetValue(Result);
+                SetCellContents(name, Result);
             }
             else if (content[0] == '=')
             {
                 string expression = content.Remove('=');
                 Formula formula = new Formula(expression, Normalize, IsValid);
-                cells[name].SetContents(formula.Evaluate());
-                cells[name].SetValue(formula.Evaluate());
+                SetCellContents(name, formula);
             }
             else
             {
-                cells[name].SetContents(content);
-                cells[name].SetValue(content);
+                SetCellContents(name, content);
             }
             return GetCellsToRecalculate(name).ToList();
         }
@@ -162,7 +170,7 @@ namespace SS
         /// <returns>A list of all of the direct dependents of the given cell.</returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$"))
+            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]*[0-9]*$") || !IsValid(name))
             {
                 throw new InvalidNameException();
             }
@@ -212,9 +220,11 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            IList<string> returnList = SetCell(name, formula);
+            string expression = formula.ToString();
+            Formula NormFormula = new Formula(expression, Normalize, IsValid);
+            IList<string> returnList = SetCell(name, NormFormula);
             List<string> ToSave = dependencies.GetDependents(name).ToList<string>();
-            dependencies.ReplaceDependents(name, formula.GetVariables());
+            dependencies.ReplaceDependents(name, NormFormula.GetVariables());
 
             try
             {

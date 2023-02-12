@@ -16,10 +16,10 @@ namespace Spreadsheet
 			contents = text;
             value = text;
         }
-        public Cell(Formula formula, Func<string, double> lookup)
+        public Cell(Formula formula)
         {
             contents = formula;
-			value = formula.Evaluate(lookup);
+			value = formula.Evaluate();
         }
 		public object GetValue()
 		{
