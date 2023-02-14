@@ -183,6 +183,6 @@ public class Exceptions
     [ExpectedException(typeof(InvalidNameException))]
     public void TestGetDirectDependentsException()
     {
-        s.GetDirectDependents("44");
+        s.GetDirectDependents(".h");
     }
 }
