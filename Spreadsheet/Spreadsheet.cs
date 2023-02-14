@@ -53,7 +53,7 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
-            else if (contents == null)
+            else if (contents == null && !(contents is double))
             {
                 throw new ArgumentNullException();
             }
