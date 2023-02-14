@@ -49,7 +49,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private ISet<string> SetCell(string name, object contents)
         {
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
+            if (name == null || name == "" || !Regex.IsMatch(name, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
             {
                 throw new InvalidNameException();
             }
