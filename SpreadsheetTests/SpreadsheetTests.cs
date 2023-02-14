@@ -178,4 +178,11 @@ public class Exceptions
         s.SetCellContents("A1", "eeeeeeeeee");
         s.GetCellContents("6");
     }
+    //Tests for an invalid name exception if string is empty
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void TestGetCellContentsException2()
+    {
+        s.SetCellContents("", "eeeeeeeeee");
+    }
 }
