@@ -61,10 +61,7 @@ namespace SS
             {
                 cells[name] = contents;
             }
-            else if (contents + "" != "")
-            {
-                cells.Add(name, contents);
-            }
+            cells.Add(name, contents);
             return GetCellsToRecalculate(name).ToHashSet();
         }
 
