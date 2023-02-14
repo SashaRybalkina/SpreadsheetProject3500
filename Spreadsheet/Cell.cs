@@ -4,22 +4,13 @@ namespace Spreadsheet
 {
 	public class Cell
 	{
-		object contents;
-        object value;
-		public Cell(double number)
-		{
-			contents = number;
-			value = number;
-		}
-        public Cell(string text)
+		private object contents;
+        private object value;
+
+        public Cell(object v)
         {
-			contents = text;
-            value = text;
-        }
-        public Cell(Formula formula)
-        {
-            contents = formula;
-			value = formula.Evaluate();
+            contents = v;
+            value = v;
         }
 		public object GetValue()
 		{

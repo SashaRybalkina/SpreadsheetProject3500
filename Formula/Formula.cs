@@ -109,11 +109,6 @@ namespace SpreadsheetUtilities
                     {
                         throw new FormulaFormatException("Cannot have two consecutive opperators or an opperator outside of parentheses.");
                     }
-                    ///If a division by zero occurs, throws an exception.
-                    if (formulaArray[i] == "/" && formulaArray[i + 1] == "0")
-                    {
-                        throw new FormulaFormatException("Cannot divide by zero");
-                    }
                     ///Builds the formula string and tokens list for later use.
                     this.formula = this.formula + formulaArray[i];
                     tokens.Add(formulaArray[i]);
