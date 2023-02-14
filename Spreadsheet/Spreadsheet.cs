@@ -64,9 +64,8 @@ namespace SS
             else if (contents + "" != "")
             {
                 cells.Add(name, contents);
-                return GetCellsToRecalculate(name).ToHashSet();
             }
-            return;
+            return GetCellsToRecalculate(name).ToHashSet();
         }
 
         /// <summary>
