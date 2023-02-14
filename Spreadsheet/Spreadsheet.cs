@@ -156,6 +156,10 @@ namespace SS
         /// <returns>A list of all of the direct dependents of the given cell.</returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
+        if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z|_][a-z|A-Z|0-9|_]*$"))
+            {
+                throw new InvalidNameException();
+            }
             return dependencies.GetDependents(name);
         }
     }
