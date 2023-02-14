@@ -183,6 +183,6 @@ public class Exceptions
     [ExpectedException(typeof(InvalidNameException))]
     public void TestGetCellContentsException2()
     {
-        s.SetCellContents("", "eeeeeeeeee");
+        s.GetDirectDependents("44");
     }
 }
