@@ -63,9 +63,10 @@ namespace SS
             }
             else if (contents + "" != "")
             {
-                cells.Add(name, contents);
+                cells.Add(Normalize(name), new Cell(contents));
+                return GetCellsToRecalculate(name).ToHashSet();
             }
-            return GetCellsToRecalculate(name).ToHashSet();
+            return (ISet<string>)cells.ToHashSet();
         }
 
         /// <summary>
