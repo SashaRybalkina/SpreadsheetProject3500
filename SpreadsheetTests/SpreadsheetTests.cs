@@ -109,6 +109,21 @@ public class methods
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
     }
+    /// <summary>
+    /// Stress test for Spreadsheet
+    /// </summary>
+    [TestMethod]
+    [Timeout(5000)]
+    public void StressTest()
+    {
+        s.SetCellContents("A1", new Formula("4+2+7"));
+        s.SetCellContents("A2", new Formula("7-5-2"));
+        s.SetCellContents("A3", new Formula("0*0*0"));
+
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
+        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
+    }
 }
 /// <summary>
 /// This test class tests all exceptions that should come from the methods
@@ -120,14 +135,14 @@ public class Exceptions
     Spreadsheet s = new();
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException))]
+    [ExpectedException(typeof(InvalidNameException4))]
     public void TestSetCellContentsWithDoubleException()
     {
         s.SetCellContents(".X", 4);
     }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException))]
+    [ExpectedException(typeof(InvalidNameException4))]
     public void TestSetCellContentsWithStringException()
     {
         s.SetCellContents("X,", "4+2+7");
@@ -141,7 +156,7 @@ public class Exceptions
     }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException))]
+    [ExpectedException(typeof(InvalidNameException4))]
     public void TestSetCellContentsWithFormulaException()
     {
         s.SetCellContents("54", new Formula("4+2+7"));
@@ -164,7 +179,7 @@ public class Exceptions
     }
     //Tests for an invalid name exception GetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException))]
+    [ExpectedException(typeof(InvalidNameException4))]
     public void TestGetCellContentsException()
     {
         s.SetCellContents("A1", "eeeeeeeeee");
@@ -172,10 +187,17 @@ public class Exceptions
     }
     //Tests for an invalid name exception in GetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException))]
+    [ExpectedException(typeof(InvalidNameException4))]
     public void TestGetCellContentsException2()
     {
         s.SetCellContents("A1", "eeeeeeeeee");
         s.GetCellContents("6");
+    }
+    //Tests for an invalid name exception if string is empty
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException4))]
+    public void TestGetDirectDependentsException()
+    {
+        s.GetDirectDependents(".h");
     }
 }

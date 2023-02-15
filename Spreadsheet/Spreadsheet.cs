@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using System.Xml.Linq;
+using System.Xml;
 using Microsoft.VisualBasic;
 using Spreadsheet;
 using SpreadsheetUtilities;
@@ -50,7 +51,42 @@ namespace SS
 
         public Spreadsheet(string pathToFile, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
-            PathToFile = pathToFile;
+            try
+            {
+                XmlReader read = XmlReader.Create(pathToFile);
+                while (read.Read())
+                {
+                    if (read.IsStartElement())
+                    {
+                        if (read.Name.Equals("spreadsheet"))
+                        {
+                            string? cell = read["cell"];
+                            if (cell is null)
+                            {
+                                throw new SpreadsheetReadWriteException("Cannot find version element");
+                            }
+                            else
+                            {
+                                string? name = read["name"];
+                                string? contents = read["contents"];
+                                if (name is null || contents is null)
+                                {
+                                    throw new SpreadsheetReadWriteException("Cannot find name or contents of cell element");
+                                }
+                                else
+                                {
+                                    SetContentsOfCell(name, contents);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                throw new SpreadsheetReadWriteException("Cannot find version element");
+            }
+            throw new SpreadsheetReadWriteException("Cannot find version element");
         }
 
         /// <summary>
@@ -64,7 +100,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private IList<string> SetCell(string name, object contents)
         {
-            if (contents == null)
+            if (contents == null && !(contents is double))
             {
                 throw new ArgumentNullException();
             }
@@ -76,14 +112,15 @@ namespace SS
             else if (contents + "" != "")
             {
                 cells.Add(Normalize(name), new Cell(contents));
+                dependencies.AddDependency(name, "");
             }
             return GetCellsToRecalculate(name).ToList();
         }
 
         public override bool Changed
         {
-            get => throw new NotImplementedException();
-            protected set => throw new NotImplementedException();
+            get =>  false;
+            protected set => Changed = false;
         }
 
         /// <summary>
@@ -94,11 +131,15 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override object GetCellContents(string name)
         {
-            if (name == null || !cells.ContainsKey(name) || !Regex.IsMatch(name, "^[a-z|A-Z]+[0-9]+$") || !IsValid(name))
+            if (name != null && Regex.IsMatch(name, @"^[a-z|A-Z|]+[0-9]+$"))
             {
-                throw new InvalidNameException();
+                if (!cells.ContainsKey(name))
+                {
+                    return "";
+                }
+                return cells[name];
             }
-            return cells[name].GetContents();
+            throw new InvalidNameException();
         }
 
         /// <summary>
@@ -124,22 +165,87 @@ namespace SS
             return cells.Keys;
         }
 
-
-
-
-
+        /// <summary>
+        /// This method gets the version of the file being looked at by reading
+        /// every line of the file, going into the "spreadsheet" element, then
+        /// into the "version" element and reading it. If there is no versioning,
+        /// or if any issues come up with reading the file, and exception is
+        /// thrown.
+        /// </summary>
+        /// <param name="filename">The file being looked at</param>
+        /// <returns>The versioning of the file</returns>
+        /// <exception cref="SpreadsheetReadWriteException"></exception>
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                XmlReader read = XmlReader.Create(filename);
+                while (read.Read())
+                {
+                    if (read.IsStartElement())
+                    {
+                        if (read.Name.Equals("spreadsheet"))
+                        {
+                            string? version = read["version"];
+                            if (version is null)
+                            {
+                                throw new SpreadsheetReadWriteException("Cannot find version element");
+                            }
+                            else
+                            {
+                                return version;
+                            }
+                        }
+                    }
+                }
+            }
+            ///If anything goes wrong reading the file, or if spreadsheet does
+            ///not contain a version element, an exception is thrown.
+            catch
+            {
+                throw new SpreadsheetReadWriteException("Unable to read file properly");
+            }
+            throw new SpreadsheetReadWriteException("Cannot find version element");
         }
 
+        /// <summary>
+        /// Write a brand new file based on the non empty cells that spreadsheet
+        /// has.
+        /// </summary>
+        /// <param name="filename">The file being looked at</param>
         public override void Save(string filename)
         {
-            throw new NotImplementedException();
+            XmlWriter write = XmlWriter.Create(filename);
+            write.WriteStartDocument();
+            write.WriteStartElement("spreadsheet");
+            write.WriteAttributeString("version", Version);
+
+            foreach (string cell in cells.Keys)
+            {
+                write.WriteStartElement("cell");
+                string name = cell;
+                string contents = "";
+                object objectContents = cells[cell].GetContents();
+                if (objectContents is double)
+                {
+                    contents = objectContents.ToString();
+                }
+                else if (objectContents is string)
+                {
+                    contents = (string)objectContents;
+                }
+                else if (objectContents is Formula)
+                {
+                    contents = "=" + objectContents.ToString();
+                }
+                write.WriteAttributeString("name", name);
+                write.WriteAttributeString("contents", contents);
+                write.WriteEndElement();
+            }
+            write.WriteEndElement();
+            write.WriteEndDocument();
+            Changed = false;
         }
-
-
-
 
         /// <summary>
         /// Checks if the string content given is a double, string, or Formula,
@@ -152,6 +258,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            Changed = true;
             if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]+[0-9]+$") || !IsValid(name))
             {
                 throw new InvalidNameException();
@@ -200,8 +307,10 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, double number)
         {
+            dependencies.ReplaceDependents(name, new HashSet<string>());
             return SetCell(name, number);
         }
+
         /// <summary>
         /// This method either adds a new cell to the cell dictionary created
         /// earlier, or replaces the current contents of the given cell if that
@@ -215,8 +324,10 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, string text)
         {
+            dependencies.ReplaceDependents(name, new HashSet<string>());
             return SetCell(name, text);
         }
+
         /// <summary>
         /// This method either adds a new cell to the cell dictionary created
         /// earlier, or replaces the current contents of the given cell if that
@@ -230,10 +341,11 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
+            ///Sets the value of cell
             string expression = formula.ToString();
             Formula NormFormula = new Formula(expression, Normalize, IsValid);
-            IList<string> returnList = SetCell(name, NormFormula);
             cells[name].SetValue(formula.Evaluate(lookup));
+
             List<string> ToSave = dependencies.GetDependents(name).ToList<string>();
             dependencies.ReplaceDependents(name, NormFormula.GetVariables());
 
@@ -247,9 +359,15 @@ namespace SS
                 throw;
             }
 
-            return returnList;
+            return SetCell(name, NormFormula);
         }
 
+        /// <summary>
+        /// Private delagate for looking up variables.
+        /// </summary>
+        /// <param name="var"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidNameException"></exception>
         private double lookup(string var)
         {
             if (!cells.ContainsKey(var))
