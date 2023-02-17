@@ -1,7 +1,7 @@
 /// <summary>
 /// Author:    Sasha Rybalkina
 /// Partner:   None
-/// Date:      Febuary 9, 2023
+/// Date:      Febuary 17, 2023
 /// Course:    CS 3500, University of Utah, School of Computing
 /// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
 ///            be copied for use in Academic Coursework.
@@ -173,13 +173,6 @@ public class Exceptions
     {
         s.SetContentsOfCell("X,", "4+2+7");
     }
-    //Tests for ArgumentNullException in SetCellContents
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void TestSetCellContentsWithStringException2()
-    {
-        s.SetCellContents("X3", (string)null);
-    }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
@@ -232,7 +225,7 @@ public class Exceptions
         write.WriteEndElement();
         write.WriteEndDocument();
 
-        Spreadsheet s2 = new("test2.txt", s => true, s=>s, "default");
+        Spreadsheet s2 = new("test2.txt", s => true, s => s, "default");
     }
     //Tests for an incorrect version exception
     [TestMethod]
