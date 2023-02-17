@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// Author:    Sasha Rybalkina
 /// Partner:   None
 /// Date:      Febuary 17, 2023
@@ -31,10 +31,10 @@ using System.Threading.Channels;
 using System.Xml.Linq;
 using System.Xml;
 using Microsoft.VisualBasic;
-using Spreadsheet;
 using SpreadsheetUtilities;
 namespace SS
 {
+
     public class Spreadsheet : AbstractSpreadsheet
     {
         private DependencyGraph dependencies = new();
@@ -54,39 +54,34 @@ namespace SS
             try
             {
                 XmlReader read = XmlReader.Create(pathToFile);
+                string? name = "";
+                string? contents = "";
                 while (read.Read())
                 {
                     if (read.IsStartElement())
                     {
-                        if (read.Name.Equals("spreadsheet"))
+                        if (read.Name.Equals("name"))
                         {
-                            string? cell = read["cell"];
-                            if (cell is null)
-                            {
-                                throw new SpreadsheetReadWriteException("Cannot find version element");
-                            }
-                            else
-                            {
-                                string? name = read["name"];
-                                string? contents = read["contents"];
-                                if (name is null || contents is null)
-                                {
-                                    throw new SpreadsheetReadWriteException("Cannot find name or contents of cell element");
-                                }
-                                else
-                                {
-                                    SetContentsOfCell(name, contents);
-                                }
-                            }
+                            name = read.Value;
+                        }
+                        else if (read.Name.Equals("contents"))
+                        {
+                            contents = read.Value;
+                        }
+                    }
+                    else
+                    {
+                        if (read.Name.Equals("/cell"))
+                        {
+                            SetContentsOfCell(name, contents);
                         }
                     }
                 }
             }
             catch
             {
-                throw new SpreadsheetReadWriteException("Cannot find version element");
+                throw new SpreadsheetReadWriteException("Unable to construct file properly");
             }
-            throw new SpreadsheetReadWriteException("Cannot find version element");
         }
 
         /// <summary>
@@ -100,27 +95,22 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private IList<string> SetCell(string name, object contents)
         {
-            if (contents == null && !(contents is double))
+            if (cells.ContainsKey(name))
             {
-                throw new ArgumentNullException();
-            }
-            else if (cells.ContainsKey(name))
-            {
-                cells[Normalize(name)].SetContents(contents);
-                cells[Normalize(name)].SetValue(contents);
+                cells[name].SetContents(contents);
+                cells[name].SetValue(contents);
             }
             else if (contents + "" != "")
             {
                 cells.Add(Normalize(name), new Cell(contents));
-                dependencies.AddDependency(name, "");
             }
             return GetCellsToRecalculate(name).ToList();
         }
 
         public override bool Changed
         {
-            get =>  false;
-            protected set => Changed = false;
+            get;
+            protected set;
         }
 
         /// <summary>
@@ -137,7 +127,7 @@ namespace SS
                 {
                     return "";
                 }
-                return cells[name];
+                return cells[name].GetContents();
             }
             throw new InvalidNameException();
         }
@@ -179,7 +169,7 @@ namespace SS
         {
             try
             {
-                XmlReader read = XmlReader.Create(filename);
+                using XmlReader read = XmlReader.Create(filename);
                 while (read.Read())
                 {
                     if (read.IsStartElement())
@@ -238,8 +228,8 @@ namespace SS
                 {
                     contents = "=" + objectContents.ToString();
                 }
-                write.WriteAttributeString("name", name);
-                write.WriteAttributeString("contents", contents);
+                write.WriteElementString("name", name);
+                write.WriteElementString("contents", contents);
                 write.WriteEndElement();
             }
             write.WriteEndElement();
@@ -258,24 +248,36 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            List<string> list = new();
             Changed = true;
-            if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]+[0-9]+$") || !IsValid(name))
+            if (content != "")
             {
-                throw new InvalidNameException();
-            }
-            else if (Double.TryParse(content, result: out double Result))
-            {
-                SetCellContents(name, Result);
-            }
-            else if (!(content[0] == '='))
-            {
-                SetCellContents(name, content);
-            }
-            else
-            {
-                string expression = content.Remove('=');
-                Formula formula = new Formula(expression, Normalize, IsValid);
-                SetCellContents(name, formula);
+                if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]+[0-9]+$") || !IsValid(name))
+                {
+                    throw new InvalidNameException();
+                }
+                else if (Double.TryParse(content, result: out double Result))
+                {
+                    list = SetCellContents(name, Result).ToList();
+                }
+                else if (!(content[0] == '='))
+                {
+                    list = SetCellContents(name, content).ToList();
+                }
+                else
+                {
+                    string expression = content[1..];
+                    Formula formula = new Formula(expression, Normalize, IsValid);
+                    list = SetCellContents(name, formula).ToList();
+                }
+                foreach (string s in list)
+                {
+                    if (GetCellContents(s) is Formula f)
+                    {
+                        cells[s].SetValue(f.Evaluate(lookup));
+                        GetCellsToRecalculate(s);
+                    }
+                }
             }
             return GetCellsToRecalculate(name).ToList();
         }
@@ -307,7 +309,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            dependencies.ReplaceDependents(name, new HashSet<string>());
+            dependencies.ReplaceDependees(name, new HashSet<string>());
             return SetCell(name, number);
         }
 
@@ -324,7 +326,7 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            dependencies.ReplaceDependents(name, new HashSet<string>());
+            dependencies.ReplaceDependees(name, new HashSet<string>());
             return SetCell(name, text);
         }
 
@@ -341,13 +343,8 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            ///Sets the value of cell
-            string expression = formula.ToString();
-            Formula NormFormula = new Formula(expression, Normalize, IsValid);
-            cells[name].SetValue(formula.Evaluate(lookup));
-
             List<string> ToSave = dependencies.GetDependents(name).ToList<string>();
-            dependencies.ReplaceDependents(name, NormFormula.GetVariables());
+            dependencies.ReplaceDependees(name, formula.GetVariables());
 
             try
             {
@@ -355,11 +352,11 @@ namespace SS
             }
             catch
             {
-                dependencies.ReplaceDependents(name, ToSave);
+                dependencies.ReplaceDependees(name, ToSave);
                 throw;
             }
 
-            return SetCell(name, NormFormula);
+            return SetCell(name, formula);
         }
 
         /// <summary>
@@ -370,11 +367,38 @@ namespace SS
         /// <exception cref="InvalidNameException"></exception>
         private double lookup(string var)
         {
-            if (!cells.ContainsKey(var))
+            if (!(GetCellValue(var) is double))
             {
-                throw new InvalidNameException();
+                throw new ArgumentException();
             }
             return (double)GetCellValue(var);
         }
+    }
+}
+public class Cell
+{
+    private object contents;
+    private object value;
+
+    public Cell(object v)
+    {
+        contents = v;
+        value = v;
+    }
+    public object GetValue()
+    {
+        return value;
+    }
+    public object GetContents()
+    {
+        return contents;
+    }
+    public void SetValue(object newValue)
+    {
+        value = newValue;
+    }
+    public void SetContents(object newContents)
+    {
+        contents = newContents;
     }
 }
