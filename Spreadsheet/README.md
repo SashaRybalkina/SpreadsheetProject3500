@@ -13,6 +13,16 @@ that may occur with the dependencies of the cells. The project only stores the d
 of the non-empty cells and keeps track of all of the dependencies of the cells, but
 cannot evaluate the contents of a cell to a value.
 # Time Estimation
-I estimate needing 5 hours to complete this project.
+I estimate needing 5 hours to complete AS4.
+I estimate needing 6 hours to complete AS5
 # Time Spent
-I only needed 4 hours to complete the assignment.
+I have spent a total of 14 hours working on spreadsheet. 3 hours were spent implementing
+AS5, 4 hours were spent debugging code, 3 hours were spent fixing a mess up in git,
+and a few minutes were spent learning how to use the tools.
+# What I have learned about my time management
+After coding several assignmnet, I have found it much easier to estimate the time that
+I need for completion. Keeping track of how much time I may need has turned out to be
+a very helpful tool for me, since I am able to pace myself with the work I need to get
+done. I am not always able to correctly estimate how much time I will need to spend,
+since some issues may come up and I need to spend time fixing it, but overall I my
+estimations have been somewhat accurate.
