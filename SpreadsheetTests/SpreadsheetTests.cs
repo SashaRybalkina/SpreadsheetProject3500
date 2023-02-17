@@ -12,11 +12,13 @@
 /// in my README file.
 ///
 /// File Contents
-/// Tests for the SetCellContents methods
+/// Tests for SetContentsOfCell
 /// Tests for GetCellContents
 /// Tests for GetNamesOfAllEmptyCells
 /// Tests for GetDirectDependents
+/// Tests for XML methods
 /// Tests for throwing exceptions when they should be thrown
+/// Stress tests
 /// </summary>
 using SpreadsheetUtilities;
 using SS;
@@ -195,7 +197,7 @@ public class Exceptions
         s.SetContentsOfCell("A1", "eeeeeeeeee");
         s.GetCellContents("6");
     }
-    //Tests for an invalid name exception in GetCellContents
+    //Tests for GetSavedversionException
     [TestMethod]
     [ExpectedException(typeof(SpreadsheetReadWriteException))]
     public void TestGetSavedVersionException()
@@ -210,7 +212,7 @@ public class Exceptions
 
         s.GetSavedVersion("test.txt");
     }
-    //Tests for an invalid name exception in GetCellContents
+    //Tests for an incorrect file structure exception
     [TestMethod]
     [ExpectedException(typeof(SpreadsheetReadWriteException))]
     public void TestConstructorException()
@@ -219,10 +221,24 @@ public class Exceptions
         ///Writes spreadsheet start element
         write.WriteStartDocument();
         write.WriteStartElement("spreadsheet");
-        write.WriteAttributeString("version", null);
+        write.WriteAttributeString("version", "default");
         write.WriteEndElement();
         write.WriteEndDocument();
 
         Spreadsheet s2 = new("test2.txt", s => true, s=>s, "default");
+    }
+    //Tests for an incorrect version exception
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestConstructorException2()
+    {
+        using XmlWriter write = XmlWriter.Create("test2.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", "version 1");
+        write.WriteEndElement();
+        write.WriteEndDocument();
+        Spreadsheet s2 = new("test2.txt", s => true, s => s, "default");
     }
 }
