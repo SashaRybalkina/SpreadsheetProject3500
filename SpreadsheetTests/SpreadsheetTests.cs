@@ -1,7 +1,7 @@
 /// <summary>
 /// Author:    Sasha Rybalkina
 /// Partner:   None
-/// Date:      Febuary 17, 2023
+/// Date:      Febuary 9, 2023
 /// Course:    CS 3500, University of Utah, School of Computing
 /// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
 ///            be copied for use in Academic Coursework.
@@ -13,17 +13,18 @@
 ///
 /// File Contents
 /// Tests for SetContentsOfCell
-/// Tests for XML reading and writing
 /// Tests for GetCellContents
 /// Tests for GetNamesOfAllEmptyCells
 /// Tests for GetDirectDependents
+/// Tests for XML methods
 /// Tests for throwing exceptions when they should be thrown
-/// Stress tests.
+/// Stress tests
 /// </summary>
 using SpreadsheetUtilities;
 using SS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
+using System.Threading.Channels;
+using System.Xml;
 
 namespace SpreadsheetTests;
 
@@ -55,7 +56,7 @@ public class methods
     /// "7-5-2", and cell A3 should contain "0*0*0".
     /// </summary>
     [TestMethod]
-    public void TestSetCellContentsWithStringAndNormalize()
+    public void TestSetCellContentsWithStringWithNormalize()
     {
         Spreadsheet s2 = new(s => true, s => s.ToUpper(), "default");
         s2.SetContentsOfCell("a1", "4+2+7");
@@ -105,8 +106,8 @@ public class methods
     [TestMethod]
     public void TestGetCellValue()
     {
-        s.SetContentsOfCell("A1", "=8+7");
-        Assert.AreEqual(15d, s.GetCellValue("A1"));
+        s.SetContentsOfCell("A1", "=5+5");
+        Assert.AreEqual(10d, s.GetCellValue("A1"));
     }
     /// <summary>
     /// Tests the GetNamesOfAllEmptyCells method. The list returned
@@ -122,35 +123,6 @@ public class methods
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
-    }
-    /// <summary>
-    /// Tests the constructor which takes in the PathToFile parameter,
-    /// and tests the Save method simultaneously.
-    /// </summary>
-    [TestMethod]
-    public void TestPathToFileConstructorAndSave()
-    {
-        s.SetContentsOfCell("A1", "=4+2+7");
-        s.SetContentsOfCell("A2", "=7-5-2");
-        s.SetContentsOfCell("A3", "=0*0*0");
-        s.Save("save.txt");
-
-        Spreadsheet s2 = new("save.txt", s => true, s => s, "default");
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().SequenceEqual(new List<string> { "A1", "A2", "A3" }));
-    }
-    /// <summary>
-    /// Tests the constructor which takes in the PathToFile parameter,
-    /// and tests the Save method simultaneously.
-    /// </summary>
-    [TestMethod]
-    public void TestGetSavedVersion()
-    {
-        Spreadsheet s2 = new(s => true, s => s, "version 1");
-        s2.SetContentsOfCell("A1", "=4+2+7");
-        s2.SetContentsOfCell("A2", "=7-5-2");
-        s2.SetContentsOfCell("A3", "=0*0*0");
-        s2.Save("save.txt");
-        Assert.AreEqual("version 1", s.GetSavedVersion("save.txt"));
     }
     /// <summary>
     /// Tests the time efficiency of Spreadsheet
@@ -179,7 +151,6 @@ public class methods
         Assert.AreEqual(s.GetCellValue("A1"), 20d);
     }
 }
-
 /// <summary>
 /// This test class tests all exceptions that should come from the methods
 /// of the Sreadsheet class.
@@ -225,5 +196,49 @@ public class Exceptions
     {
         s.SetContentsOfCell("A1", "eeeeeeeeee");
         s.GetCellContents("6");
+    }
+    //Tests for GetSavedversionException
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestGetSavedVersionException()
+    {
+        using XmlWriter write = XmlWriter.Create("test.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", null);
+        write.WriteEndElement();
+        write.WriteEndDocument();
+
+        s.GetSavedVersion("test.txt");
+    }
+    //Tests for an incorrect file structure exception
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestConstructorException()
+    {
+        using XmlWriter write = XmlWriter.Create("test2.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", "default");
+        write.WriteEndElement();
+        write.WriteEndDocument();
+
+        Spreadsheet s2 = new("test2.txt", s => true, s=>s, "default");
+    }
+    //Tests for an incorrect version exception
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestConstructorException2()
+    {
+        using XmlWriter write = XmlWriter.Create("test2.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", "version 1");
+        write.WriteEndElement();
+        write.WriteEndDocument();
+        Spreadsheet s2 = new("test2.txt", s => true, s => s, "default");
     }
 }
