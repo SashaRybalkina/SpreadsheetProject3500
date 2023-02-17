@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// Author:    Sasha Rybalkina
 /// Partner:   None
 /// Date:      Febuary 9, 2023
@@ -37,10 +37,10 @@ public class methods
     [TestMethod]
     public void TestSetCellContentsWithDouble()
     {
-        s.SetCellContents("A1", 4);
-        s.SetCellContents("A2", 5);
-        s.SetCellContents("A3", 6);
-        s.SetCellContents("A3", 7);
+        s.SetContentsOfCell("A1", "4");
+        s.SetContentsOfCell("A2", "5");
+        s.SetContentsOfCell("A3", "6");
+        s.SetContentsOfCell("A3", "7");
 
         Assert.AreEqual((double)4, s.GetCellContents("A1"));
         Assert.AreEqual((double)5, s.GetCellContents("A2"));
@@ -52,13 +52,14 @@ public class methods
     /// "7-5-2", and cell A3 should contain "0*0*0".
     /// </summary>
     [TestMethod]
-    public void TestSetCellContentsWithString()
+    public void TestSetCellContentsWithStringAndNormalize()
     {
-        s.SetCellContents("A1", "4+2+7");
-        s.SetCellContents("A2", "7-5-2");
-        s.SetCellContents("A3", "1*1*1");
-        s.SetCellContents("A3", "0*0*0");
-        s.SetCellContents("A4", "");
+        Spreadsheet s2 = new(s => true, s => s.ToUpper(), "default");
+        s.SetContentsOfCell("a1", "4+2+7");
+        s.SetContentsOfCell("a2", "7-5-2");
+        s.SetContentsOfCell("a3", "1*1*1");
+        s.SetContentsOfCell("a3", "0*0*0");
+        s.SetContentsOfCell("a4", "");
 
         Assert.AreEqual("4+2+7", s.GetCellContents("A1"));
         Assert.AreEqual("7-5-2", s.GetCellContents("A2"));
@@ -75,10 +76,10 @@ public class methods
     [TestMethod]
     public void TestSetCellContentsWithFormula()
     {
-        s.SetCellContents("A1", new Formula("4+2+7"));
-        s.SetCellContents("A2", new Formula("7-5-2"));
-        s.SetCellContents("A3", new Formula("1*1*1"));
-        s.SetCellContents("A3", new Formula("0*0*0"));
+        s.SetContentsOfCell("A1", "=4+2+7");
+        s.SetContentsOfCell("A2", "=7-5-2");
+        s.SetContentsOfCell("A3", "=1*1*1");
+        s.SetContentsOfCell("A3", "=0*0*0");
 
         Assert.AreEqual(new Formula("4+2+7"), s.GetCellContents("A1"));
         Assert.AreEqual(new Formula("7-5-2"), s.GetCellContents("A2"));
@@ -91,8 +92,18 @@ public class methods
     [TestMethod]
     public void TestGetCellContents()
     {
-        s.SetCellContents("A1", "eeeeeeeeee");
+        s.SetContentsOfCell("A1", "eeeeeeeeee");
         Assert.AreEqual("eeeeeeeeee", s.GetCellContents("A1"));
+    }
+    /// <summary>
+    /// Tests the GetCellContents method. Invoking this method on cell
+    /// A1 should return the string "eeeeeeeeee"
+    /// </summary>
+    [TestMethod]
+    public void TestGetCellValue()
+    {
+        s.SetContentsOfCell("A1", "=8+7");
+        Assert.AreEqual(15d, s.GetCellValue("A1"));
     }
     /// <summary>
     /// Tests the GetNamesOfAllEmptyCells method. The list returned
@@ -101,28 +112,72 @@ public class methods
     [TestMethod]
     public void TestGetNamesOfAllEmptyCells()
     {
-        s.SetCellContents("A1", new Formula("4+2+7"));
-        s.SetCellContents("A2", new Formula("7-5-2"));
-        s.SetCellContents("A3", new Formula("0*0*0"));
+        s.SetContentsOfCell("A1", "=4+2+7");
+        s.SetContentsOfCell("A2", "=7-5-2");
+        s.SetContentsOfCell("A3", "=0*0*0");
 
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
     }
     /// <summary>
-    /// Stress test for Spreadsheet
+    /// Tests the constructor which takes in the PathToFile parameter,
+    /// and tests the Save method simultaneously.
     /// </summary>
     [TestMethod]
-    [Timeout(5000)]
+    public void TestPathToFileConstructorAndSave()
+    {
+        s.SetContentsOfCell("A1", "=4+2+7");
+        s.SetContentsOfCell("A2", "=7-5-2");
+        s.SetContentsOfCell("A3", "=0*0*0");
+        s.Save("save.txt");
+
+        Spreadsheet s2 = new("save.txt", s => true, s => s, "default");
+
+        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A1"));
+        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A2"));
+        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A3"));
+        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().SequenceEqual(new List<string> { "A1", "A2", "A3" }));
+    }
+    /// <summary>
+    /// Tests the constructor which takes in the PathToFile parameter,
+    /// and tests the Save method simultaneously.
+    /// </summary>
+    [TestMethod]
+    public void TestGetSavedVersion()
+    {
+        Spreadsheet s2 = new(s => true, s => s, "version 1");
+        s2.SetContentsOfCell("A1", "=4+2+7");
+        s2.SetContentsOfCell("A2", "=7-5-2");
+        s2.SetContentsOfCell("A3", "=0*0*0");
+        s2.Save("save.txt");
+        Assert.AreEqual("version 1", s.GetSavedVersion("save.txt"));
+    }
+    /// <summary>
+    /// Tests the time efficiency of Spreadsheet
+    /// </summary>
+    [TestMethod]
+    [Timeout(1000)]
     public void StressTest()
     {
-        s.SetCellContents("A1", new Formula("4+2+7"));
-        s.SetCellContents("A2", new Formula("7-5-2"));
-        s.SetCellContents("A3", new Formula("0*0*0"));
-
-        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
-        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
-        Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
+        for (int i = 1; i < 1001; i++)
+        {
+            s.SetContentsOfCell("A" + i, "1");
+        }
+    }
+    /// <summary>
+    /// Tests the functioning of the dependency chains
+    /// </summary>
+    [TestMethod]
+    [Timeout(1000)]
+    public void StressTest2()
+    {
+        for (int i = 1; i < 20; i++)
+        {
+            s.SetContentsOfCell("A" + i, "A" + (i + 1) + " + 1");
+        }
+        s.SetContentsOfCell("A20", "1");
+        Assert.AreEqual(s.GetCellValue("A1"), 20d);
     }
 }
 /// <summary>
@@ -135,69 +190,40 @@ public class Exceptions
     Spreadsheet s = new();
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
+    [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithDoubleException()
     {
-        s.SetCellContents(".X", 4);
+        s.SetContentsOfCell(".X", "4");
     }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
+    [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithStringException()
     {
-        s.SetCellContents("X,", "4+2+7");
-    }
-    //Tests for ArgumentNullException in SetCellContents
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void TestSetCellContentsWithStringException2()
-    {
-        s.SetCellContents("X3", (string)null);
+        s.SetContentsOfCell("X,", "4+2+7");
     }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
+    [ExpectedException(typeof(InvalidNameException))]
     public void TestSetCellContentsWithFormulaException()
     {
-        s.SetCellContents("54", new Formula("4+2+7"));
-    }
-    //Tests for ArgumentNullException in SetCellContents
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void TestSetCellContentsWithFormulaException2()
-    {
-        s.SetCellContents("X3", (Formula)null);
+        s.SetContentsOfCell("54", "=4+2+7");
     }
     //Tests for CircularException in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(CircularException))]
     public void TestSetCellContentsCircularException()
     {
-        s.SetCellContents("X1", new Formula("X3"));
-        s.SetCellContents("X2", new Formula("X1 + 10"));
-        s.SetCellContents("X3", new Formula("X2 + 10"));
-    }
-    //Tests for an invalid name exception GetCellContents
-    [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
-    public void TestGetCellContentsException()
-    {
-        s.SetCellContents("A1", "eeeeeeeeee");
-        s.GetCellContents("A4");
+        s.SetContentsOfCell("X1", "=X3");
+        s.SetContentsOfCell("X2", "=X1 + 10");
+        s.SetContentsOfCell("X3", "=X2 + 10");
     }
     //Tests for an invalid name exception in GetCellContents
     [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
+    [ExpectedException(typeof(InvalidNameException))]
     public void TestGetCellContentsException2()
     {
-        s.SetCellContents("A1", "eeeeeeeeee");
+        s.SetContentsOfCell("A1", "eeeeeeeeee");
         s.GetCellContents("6");
-    }
-    //Tests for an invalid name exception if string is empty
-    [TestMethod]
-    [ExpectedException(typeof(InvalidNameException4))]
-    public void TestGetDirectDependentsException()
-    {
-        s.GetDirectDependents(".h");
     }
 }
