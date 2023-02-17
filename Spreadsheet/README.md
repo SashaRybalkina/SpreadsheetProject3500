@@ -26,3 +26,19 @@ a very helpful tool for me, since I am able to pace myself with the work I need 
 done. I am not always able to correctly estimate how much time I will need to spend,
 since some issues may come up and I need to spend time fixing it, but overall I my
 estimations have been somewhat accurate.
+# Examples of Good Software Practice
+One of the exampels of me using GSP is through creating helper methods. For example,
+when implementing the Formula class, I used two helper methods in the Evaluate method,
+one for handling adding and subtracting, and one for handling multiplying and dividing,
+which limited code repitition.
+
+Another example of me using GSP is through using commenting and documentation where it
+is appropriate. In the FormulaEvaluator class, I commented every single if statement
+to create more clarity for the functioning of that if satement. In the DependencyGraph
+and Formula classes, I documented every single method that the classes had, and clearly
+defined the behavior of the methods, their parameters, and what they were supposed to
+return.
+
+The third example of me using GPS is through using proper versioning. For assignment 4,
+I have been commiting regularly and giving meaningful comments to all of my commits.
+Also, I have been adding tags to all of my commits.
