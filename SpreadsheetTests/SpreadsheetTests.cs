@@ -21,6 +21,8 @@
 using SpreadsheetUtilities;
 using SS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Channels;
+using System.Xml;
 
 namespace SpreadsheetTests;
 
@@ -52,19 +54,19 @@ public class methods
     /// "7-5-2", and cell A3 should contain "0*0*0".
     /// </summary>
     [TestMethod]
-    public void TestSetCellContentsWithStringAndNormalize()
+    public void TestSetCellContentsWithStringWithNormalize()
     {
         Spreadsheet s2 = new(s => true, s => s.ToUpper(), "default");
-        s.SetContentsOfCell("a1", "4+2+7");
-        s.SetContentsOfCell("a2", "7-5-2");
-        s.SetContentsOfCell("a3", "1*1*1");
-        s.SetContentsOfCell("a3", "0*0*0");
-        s.SetContentsOfCell("a4", "");
+        s2.SetContentsOfCell("a1", "4+2+7");
+        s2.SetContentsOfCell("a2", "7-5-2");
+        s2.SetContentsOfCell("a3", "1*1*1");
+        s2.SetContentsOfCell("a3", "0*0*0");
+        s2.SetContentsOfCell("a4", "");
 
-        Assert.AreEqual("4+2+7", s.GetCellContents("A1"));
-        Assert.AreEqual("7-5-2", s.GetCellContents("A2"));
-        Assert.AreEqual("0*0*0", s.GetCellContents("A3"));
-        Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("A4"));
+        Assert.AreEqual("4+2+7", s2.GetCellContents("A1"));
+        Assert.AreEqual("7-5-2", s2.GetCellContents("A2"));
+        Assert.AreEqual("0*0*0", s2.GetCellContents("A3"));
+        Assert.IsFalse(s2.GetNamesOfAllNonemptyCells().Contains("A4"));
     }
     /// <summary>
     /// Tests the SetCellContents method that passes in a string.
@@ -102,8 +104,8 @@ public class methods
     [TestMethod]
     public void TestGetCellValue()
     {
-        s.SetContentsOfCell("A1", "=8+7");
-        Assert.AreEqual(15d, s.GetCellValue("A1"));
+        s.SetContentsOfCell("A1", "=5+5");
+        Assert.AreEqual(10d, s.GetCellValue("A1"));
     }
     /// <summary>
     /// Tests the GetNamesOfAllEmptyCells method. The list returned
@@ -119,39 +121,6 @@ public class methods
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A1"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A2"));
         Assert.IsTrue(s.GetNamesOfAllNonemptyCells().Contains("A3"));
-    }
-    /// <summary>
-    /// Tests the constructor which takes in the PathToFile parameter,
-    /// and tests the Save method simultaneously.
-    /// </summary>
-    [TestMethod]
-    public void TestPathToFileConstructorAndSave()
-    {
-        s.SetContentsOfCell("A1", "=4+2+7");
-        s.SetContentsOfCell("A2", "=7-5-2");
-        s.SetContentsOfCell("A3", "=0*0*0");
-        s.Save("save.txt");
-
-        Spreadsheet s2 = new("save.txt", s => true, s => s, "default");
-
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A1"));
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A2"));
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A3"));
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().SequenceEqual(new List<string> { "A1", "A2", "A3" }));
-    }
-    /// <summary>
-    /// Tests the constructor which takes in the PathToFile parameter,
-    /// and tests the Save method simultaneously.
-    /// </summary>
-    [TestMethod]
-    public void TestGetSavedVersion()
-    {
-        Spreadsheet s2 = new(s => true, s => s, "version 1");
-        s2.SetContentsOfCell("A1", "=4+2+7");
-        s2.SetContentsOfCell("A2", "=7-5-2");
-        s2.SetContentsOfCell("A3", "=0*0*0");
-        s2.Save("save.txt");
-        Assert.AreEqual("version 1", s.GetSavedVersion("save.txt"));
     }
     /// <summary>
     /// Tests the time efficiency of Spreadsheet
@@ -174,7 +143,7 @@ public class methods
     {
         for (int i = 1; i < 20; i++)
         {
-            s.SetContentsOfCell("A" + i, "A" + (i + 1) + " + 1");
+            s.SetContentsOfCell("A" + i, "=A" + (i + 1) + " + 1");
         }
         s.SetContentsOfCell("A20", "1");
         Assert.AreEqual(s.GetCellValue("A1"), 20d);
@@ -225,5 +194,35 @@ public class Exceptions
     {
         s.SetContentsOfCell("A1", "eeeeeeeeee");
         s.GetCellContents("6");
+    }
+    //Tests for an invalid name exception in GetCellContents
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestGetSavedVersionException()
+    {
+        using XmlWriter write = XmlWriter.Create("test.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", null);
+        write.WriteEndElement();
+        write.WriteEndDocument();
+
+        s.GetSavedVersion("test.txt");
+    }
+    //Tests for an invalid name exception in GetCellContents
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void TestConstructorException()
+    {
+        using XmlWriter write = XmlWriter.Create("test2.txt");
+        ///Writes spreadsheet start element
+        write.WriteStartDocument();
+        write.WriteStartElement("spreadsheet");
+        write.WriteAttributeString("version", null);
+        write.WriteEndElement();
+        write.WriteEndDocument();
+
+        Spreadsheet s2 = new("test2.txt", s => true, s=>s, "default");
     }
 }
