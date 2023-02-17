@@ -133,7 +133,7 @@ public class methods
     {
         for (int i = 1; i < 1001; i++)
         {
-            s.SetContentsOfCell("A" + i, "1");
+            s.SetContentsOfCell("A" + i, "1+2*7");
         }
     }
     /// <summary>
