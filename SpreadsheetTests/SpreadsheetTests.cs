@@ -1,7 +1,7 @@
 /// <summary>
 /// Author:    Sasha Rybalkina
 /// Partner:   None
-/// Date:      Febuary 9, 2023
+/// Date:      Febuary 17, 2023
 /// Course:    CS 3500, University of Utah, School of Computing
 /// Copyright: CS 3500 and Sasha Rybalkina - This work may not 
 ///            be copied for use in Academic Coursework.
@@ -12,11 +12,13 @@
 /// in my README file.
 ///
 /// File Contents
-/// Tests for the SetCellContents methods
+/// Tests for SetContentsOfCell
+/// Tests for XML reading and writing
 /// Tests for GetCellContents
 /// Tests for GetNamesOfAllEmptyCells
 /// Tests for GetDirectDependents
 /// Tests for throwing exceptions when they should be thrown
+/// Stress tests.
 /// </summary>
 using SpreadsheetUtilities;
 using SS;
