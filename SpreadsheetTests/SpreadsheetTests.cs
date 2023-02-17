@@ -173,6 +173,13 @@ public class Exceptions
     {
         s.SetContentsOfCell("X,", "4+2+7");
     }
+    //Tests for ArgumentNullException in SetCellContents
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentNullException))]
+    public void TestSetCellContentsWithStringException2()
+    {
+        s.SetCellContents("X3", (string)null);
+    }
     //Tests for an invalid name exception in SetCellContents
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
