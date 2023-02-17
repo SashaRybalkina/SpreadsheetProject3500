@@ -38,7 +38,7 @@ namespace SS
     {
         private DependencyGraph dependencies = new();
         private Dictionary<string, Cell> cells = new();
-        private string ?PathToFile;
+        private string? PathToFile;
 
         public Spreadsheet() : this(s => true, s => s, "default")
         {
@@ -60,18 +60,35 @@ namespace SS
                 {
                     if (read.IsStartElement())
                     {
-                        if (read.Name.Equals("name"))
+                        if (read.Name.Equals("spreadsheet"))
                         {
+                            if (read["version"] != Version)
+                            {
+                                throw new SpreadsheetReadWriteException("Incorrect version");
+                            }
+                        }
+                        else if (read.Name.Equals("cell"))
+                        {
+
+                        }
+                        else if (read.Name.Equals("name"))
+                        {
+                            read.Read();
                             name = read.Value;
                         }
                         else if (read.Name.Equals("contents"))
                         {
+                            read.Read();
                             contents = read.Value;
+                        }
+                        else
+                        {
+                            throw new SpreadsheetReadWriteException("Incorrect file structure");
                         }
                     }
                     else
                     {
-                        if (read.Name.Equals("/cell"))
+                        if (read.Name.Equals("cell"))
                         {
                             SetContentsOfCell(name, contents);
                         }
