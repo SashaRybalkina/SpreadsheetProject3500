@@ -4,7 +4,7 @@ Start Date: 7-Jan-2023
 Course: CS 3500, University of Utah, School of Computing 
 GitHub ID: crazyrussian123456 
 Repo: uofu-cs3500-spring23/spreadsheet-crazyrussian123456 
-Commit Date: 2-9-2023 6:00 
+Commit Date: 2-17-2023 6:00 
 Solution: Spreadsheet 
 Copyright: CS 3500 and Sasha Rybalkina - This work may not be copied for use in Academic Coursework.
 # Spreadsheet
@@ -15,6 +15,7 @@ software practice.
 10 / 8  - Assignment 2
 10 / 7  - Assigment 3
 5 / 4  - Assignment 4
+6 / 10 - Assignment 5
 # Examples of Good Software Practice
 One of the exampels of me using GSP is through creating helper methods. For example,
 when implementing the Formula class, I used two helper methods in the Evaluate method,
