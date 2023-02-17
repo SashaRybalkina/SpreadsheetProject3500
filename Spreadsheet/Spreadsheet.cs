@@ -15,14 +15,13 @@
 /// The method GetCellContents, which returns the contents of a specified cell
 /// The method GetNamesOfAllNonemptyCells, which returns a list of all nonempty
 /// cells.
-/// Three variations of the SetCellContents method, with one of the variations
-/// handling a double as one of the parameters, one of the variations handling
-/// a Formula class, and the last variation handling a string parameter. All
-/// three of these variations add new cells or new contents to existing cells,
-/// but the variation that takes in a Formula class also checks for circulation
-/// and resolves said circulation if found.
+/// The SetContentsOfCell method, which sets the contents and values of cells.
+/// If a cell's contents are a Formula class, the value of that cell gets
+/// evaluated based on the formula contents.
 /// The GetDirectDependents method, which returns all of the direct dependents
 /// of a specified cell.
+/// The GetSavedVersion method, which reads a given file and returns its versioning.
+/// The Save method, which writes a brand new file with all current cells.
 /// </summary>
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,7 @@ namespace SS
     {
         private DependencyGraph dependencies = new();
         private Dictionary<string, Cell> cells = new();
-        private string ?PathToFile;
+        private string? PathToFile;
 
         public Spreadsheet() : this(s => true, s => s, "default")
         {
@@ -49,6 +48,7 @@ namespace SS
         {
         }
 
+        /// Constructor for getting cells and versioning from a file.
         public Spreadsheet(string pathToFile, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
             try
@@ -60,18 +60,35 @@ namespace SS
                 {
                     if (read.IsStartElement())
                     {
-                        if (read.Name.Equals("name"))
+                        if (read.Name.Equals("spreadsheet"))
                         {
+                            if (read["version"] != Version)
+                            {
+                                throw new SpreadsheetReadWriteException("Incorrect version");
+                            }
+                        }
+                        else if (read.Name.Equals("cell"))
+                        {
+
+                        }
+                        else if (read.Name.Equals("name"))
+                        {
+                            read.Read();
                             name = read.Value;
                         }
                         else if (read.Name.Equals("contents"))
                         {
+                            read.Read();
                             contents = read.Value;
+                        }
+                        else
+                        {
+                            throw new SpreadsheetReadWriteException("Incorrect file structure");
                         }
                     }
                     else
                     {
-                        if (read.Name.Equals("/cell"))
+                        if (read.Name.Equals("cell"))
                         {
                             SetContentsOfCell(name, contents);
                         }
@@ -102,7 +119,7 @@ namespace SS
             }
             else if (contents + "" != "")
             {
-                cells.Add(Normalize(name), new Cell(contents));
+                cells.Add(name, new Cell(contents));
             }
             return GetCellsToRecalculate(name).ToList();
         }
@@ -205,7 +222,8 @@ namespace SS
         /// <param name="filename">The file being looked at</param>
         public override void Save(string filename)
         {
-            XmlWriter write = XmlWriter.Create(filename);
+            using XmlWriter write = XmlWriter.Create(filename);
+            ///Writes spreadsheet start element
             write.WriteStartDocument();
             write.WriteStartElement("spreadsheet");
             write.WriteAttributeString("version", Version);
@@ -216,6 +234,7 @@ namespace SS
                 string name = cell;
                 string contents = "";
                 object objectContents = cells[cell].GetContents();
+                ///If statements for handling different types of contents.
                 if (objectContents is double)
                 {
                     contents = objectContents.ToString();
@@ -250,6 +269,7 @@ namespace SS
         {
             List<string> list = new();
             Changed = true;
+            string normname = Normalize(name);
             if (content != "")
             {
                 if (name == null || !Regex.IsMatch(name, "^[a-z|A-Z]+[0-9]+$") || !IsValid(name))
@@ -258,18 +278,19 @@ namespace SS
                 }
                 else if (Double.TryParse(content, result: out double Result))
                 {
-                    list = SetCellContents(name, Result).ToList();
+                    list = SetCellContents(normname, Result).ToList();
                 }
                 else if (!(content[0] == '='))
                 {
-                    list = SetCellContents(name, content).ToList();
+                    list = SetCellContents(normname, content).ToList();
                 }
                 else
                 {
                     string expression = content[1..];
                     Formula formula = new Formula(expression, Normalize, IsValid);
-                    list = SetCellContents(name, formula).ToList();
+                    list = SetCellContents(normname, formula).ToList();
                 }
+                ///Recalculates 
                 foreach (string s in list)
                 {
                     if (GetCellContents(s) is Formula f)
@@ -279,7 +300,7 @@ namespace SS
                     }
                 }
             }
-            return GetCellsToRecalculate(name).ToList();
+            return list;
         }
 
         /// <summary>
