@@ -23,6 +23,7 @@
 using SpreadsheetUtilities;
 using SS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace SpreadsheetTests;
 
@@ -57,16 +58,16 @@ public class methods
     public void TestSetCellContentsWithStringAndNormalize()
     {
         Spreadsheet s2 = new(s => true, s => s.ToUpper(), "default");
-        s.SetContentsOfCell("a1", "4+2+7");
-        s.SetContentsOfCell("a2", "7-5-2");
-        s.SetContentsOfCell("a3", "1*1*1");
-        s.SetContentsOfCell("a3", "0*0*0");
-        s.SetContentsOfCell("a4", "");
+        s2.SetContentsOfCell("a1", "4+2+7");
+        s2.SetContentsOfCell("a2", "7-5-2");
+        s2.SetContentsOfCell("a3", "1*1*1");
+        s2.SetContentsOfCell("a3", "0*0*0");
+        s2.SetContentsOfCell("a4", "");
 
-        Assert.AreEqual("4+2+7", s.GetCellContents("A1"));
-        Assert.AreEqual("7-5-2", s.GetCellContents("A2"));
-        Assert.AreEqual("0*0*0", s.GetCellContents("A3"));
-        Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("A4"));
+        Assert.AreEqual("4+2+7", s2.GetCellContents("A1"));
+        Assert.AreEqual("7-5-2", s2.GetCellContents("A2"));
+        Assert.AreEqual("0*0*0", s2.GetCellContents("A3"));
+        Assert.IsFalse(s2.GetNamesOfAllNonemptyCells().Contains("A4"));
     }
     /// <summary>
     /// Tests the SetCellContents method that passes in a string.
@@ -135,10 +136,6 @@ public class methods
         s.Save("save.txt");
 
         Spreadsheet s2 = new("save.txt", s => true, s => s, "default");
-
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A1"));
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A2"));
-        Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().Contains("A3"));
         Assert.IsTrue(s2.GetNamesOfAllNonemptyCells().SequenceEqual(new List<string> { "A1", "A2", "A3" }));
     }
     /// <summary>
@@ -176,12 +173,13 @@ public class methods
     {
         for (int i = 1; i < 20; i++)
         {
-            s.SetContentsOfCell("A" + i, "A" + (i + 1) + " + 1");
+            s.SetContentsOfCell("A" + i, "=A" + (i + 1) + " + 1");
         }
         s.SetContentsOfCell("A20", "1");
         Assert.AreEqual(s.GetCellValue("A1"), 20d);
     }
 }
+
 /// <summary>
 /// This test class tests all exceptions that should come from the methods
 /// of the Sreadsheet class.
