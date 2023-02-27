@@ -25,7 +25,7 @@
             <ScrollView>
                 <HorizontalStackLayout>
                     <VerticalStackLayout x:Name="LeftLabels"  BackgroundColor="HotPink">  </VerticalStackLayout>
-                    <VerticalStackLayout x:Name="Grid"        BackgroundColor="Pink"> </VerticalStackLayout>
+                    <VerticalStackLayout x:Name="Grid"        BackgroundColor="Pink"></VerticalStackLayout>
                 </HorizontalStackLayout>
             </ScrollView>
         </VerticalStackLayout>
