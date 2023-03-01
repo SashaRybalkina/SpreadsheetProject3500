@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spreadsheet", "Spreadsheet\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{1E6CD696-C2CC-4BCF-86C1-B80A7085461F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI", "GUI\GUI.csproj", "{D2BF16CA-19DB-4436-B363-3058A4D40826}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{1E6CD696-C2CC-4BCF-86C1-B80A7085461F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E6CD696-C2CC-4BCF-86C1-B80A7085461F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E6CD696-C2CC-4BCF-86C1-B80A7085461F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2BF16CA-19DB-4436-B363-3058A4D40826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2BF16CA-19DB-4436-B363-3058A4D40826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2BF16CA-19DB-4436-B363-3058A4D40826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2BF16CA-19DB-4436-B363-3058A4D40826}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +68,24 @@ Global
 		SolutionGuid = {9E3F2B79-DD4D-40DE-8C79-54A845A14753}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 80
+		$4.TabsToSpaces = True
+		$4.scope = text/plain
+		$0.TextStylePolicy = $5
+		$5.inheritsSet = null
+		$5.scope = application/xml
+		$0.XmlFormattingPolicy = $6
+		$6.scope = application/xml
 	EndGlobalSection
 EndGlobal
